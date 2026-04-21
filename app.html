@@ -1068,11 +1068,11 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
     </div>
     <div class="pf-arrow">→</div>
   </div>
-  <div class="pf-card" style="opacity:0.5;pointer-events:none;">
+<div class="pf-card" onclick="openSyncModal()">
     <div class="pf-icon">🔄</div>
     <div class="pf-text">
       <div class="pf-title">デバイス間同期</div>
-      <div class="pf-sub">近日公開</div>
+      <div class="pf-sub" id="syncStatusBrief">未ログイン</div>
     </div>
     <div class="pf-arrow">→</div>
   </div>
@@ -1151,6 +1151,23 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
     <div class="ai-footer">
       <button class="ai-btn secondary" onclick="closeAIAnalysis()">閉じる</button>
       <button class="ai-btn primary" onclick="copyAIAnalysis()">テキストをコピー</button>
+    </div>
+  </div>
+</div>
+
+  <!-- Sync Modal -->
+<div class="sync-overlay" id="syncOverlay">
+  <div class="sync-sheet">
+    <div class="sync-handle"></div>
+    <div class="sync-header">
+      <div class="sync-title">デバイス間同期</div>
+      <div class="sync-subtitle">ログインすると、PC・スマホで同じデータにアクセスできます</div>
+    </div>
+    <div class="sync-body" id="syncBody">
+      <!-- JS で動的に生成 -->
+    </div>
+    <div class="sync-footer">
+      <button class="sync-close-btn" onclick="closeSyncModal()">閉じる</button>
     </div>
   </div>
 </div>
@@ -5721,6 +5738,259 @@ function copyAIAnalysis() {
   });
 }
 
+  // ===== DEVICE SYNC (デバイス間同期) =====
+
+function openSyncModal() {
+  document.getElementById('syncOverlay').classList.add('active');
+  renderSyncUI();
+}
+
+function closeSyncModal() {
+  document.getElementById('syncOverlay').classList.remove('active');
+}
+
+document.getElementById('syncOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeSyncModal();
+});
+
+async function renderSyncUI() {
+  const body = document.getElementById('syncBody');
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session && session.user) {
+      // ログイン済み
+      const email = session.user.email;
+      document.getElementById('syncStatusBrief').textContent = email;
+      
+      body.innerHTML = `
+        <div class="sync-status">
+          <div class="sync-status-icon">✅</div>
+          <div class="sync-status-text">同期が有効です</div>
+          <div class="sync-status-sub">このアカウントでログインした端末間でデータが共有されます</div>
+          <div class="sync-email-display">${email}</div>
+        </div>
+        <div class="sync-actions">
+          <button class="sync-action-btn primary" onclick="syncNow()">今すぐ同期</button>
+          <button class="sync-action-btn danger" onclick="logoutSync()">ログアウト</button>
+        </div>
+      `;
+    } else {
+      // 未ログイン
+      document.getElementById('syncStatusBrief').textContent = '未ログイン';
+      showLoginForm();
+    }
+  } catch (err) {
+    console.error('Sync UI error:', err);
+    showLoginForm();
+  }
+}
+
+function showLoginForm() {
+  const body = document.getElementById('syncBody');
+  body.innerHTML = `
+    <div class="sync-status">
+      <div class="sync-status-icon">🔄</div>
+      <div class="sync-status-text">データを同期する</div>
+      <div class="sync-status-sub">メールアドレスでログインすると、<br>どの端末からでも同じ記録にアクセスできます</div>
+    </div>
+    <div id="syncMessage" class="sync-message"></div>
+    <div class="sync-form" id="syncLoginForm">
+      <div class="sync-form-title" id="syncFormTitle">ログイン</div>
+      <input type="email" class="sync-input" id="syncEmail" placeholder="メールアドレス" autocomplete="email">
+      <input type="password" class="sync-input" id="syncPassword" placeholder="パスワード（6文字以上）" autocomplete="current-password">
+      <button class="sync-form-btn" id="syncSubmitBtn" onclick="submitSync()">ログイン</button>
+      <button class="sync-form-toggle" id="syncToggleBtn" onclick="toggleSyncMode()">アカウントをお持ちでない方 → 新規登録</button>
+    </div>
+  `;
+}
+
+let syncMode = 'login'; // 'login' or 'signup'
+
+function toggleSyncMode() {
+  syncMode = syncMode === 'login' ? 'signup' : 'login';
+  const title = document.getElementById('syncFormTitle');
+  const btn = document.getElementById('syncSubmitBtn');
+  const toggle = document.getElementById('syncToggleBtn');
+  
+  if (syncMode === 'signup') {
+    title.textContent = '新規登録';
+    btn.textContent = '登録する';
+    toggle.textContent = 'すでにアカウントをお持ちの方 → ログイン';
+  } else {
+    title.textContent = 'ログイン';
+    btn.textContent = 'ログイン';
+    toggle.textContent = 'アカウントをお持ちでない方 → 新規登録';
+  }
+  
+  hideMessage();
+}
+
+function showMessage(text, type) {
+  const msg = document.getElementById('syncMessage');
+  if (!msg) return;
+  msg.className = 'sync-message ' + type;
+  msg.textContent = text;
+}
+
+function hideMessage() {
+  const msg = document.getElementById('syncMessage');
+  if (msg) msg.className = 'sync-message';
+}
+
+async function submitSync() {
+  const email = document.getElementById('syncEmail').value.trim();
+  const password = document.getElementById('syncPassword').value;
+  const btn = document.getElementById('syncSubmitBtn');
+  
+  if (!email || !password) {
+    showMessage('メールアドレスとパスワードを入力してください', 'error');
+    return;
+  }
+  if (password.length < 6) {
+    showMessage('パスワードは6文字以上で入力してください', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '処理中...';
+  hideMessage();
+
+  try {
+    let result;
+    
+    if (syncMode === 'signup') {
+      // 新規登録
+      result = await supabase.auth.signUp({ email, password });
+      
+      if (result.error) throw result.error;
+      
+      if (result.data.user && !result.data.session) {
+        // メール確認が必要
+        showMessage('確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。', 'info');
+        btn.disabled = false;
+        btn.textContent = '登録する';
+        return;
+      }
+    } else {
+      // ログイン
+      result = await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) throw result.error;
+    }
+
+    // ログイン成功 → 既存データをuser_idに紐付け
+    if (result.data.session) {
+      await migrateDataToUser(result.data.session.user.id);
+      showMessage('ログインしました。データの同期が有効になりました。', 'success');
+      
+      setTimeout(() => {
+        renderSyncUI();
+      }, 1500);
+    }
+
+  } catch (err) {
+    console.error('Auth error:', err);
+    let errorMsg = 'エラーが発生しました。';
+    if (err.message.includes('Invalid login')) errorMsg = 'メールアドレスまたはパスワードが正しくありません。';
+    else if (err.message.includes('already registered')) errorMsg = 'このメールアドレスはすでに登録されています。ログインしてください。';
+    else if (err.message.includes('Email not confirmed')) errorMsg = 'メールアドレスの確認が完了していません。確認メールを確認してください。';
+    else errorMsg = err.message;
+    
+    showMessage(errorMsg, 'error');
+    btn.disabled = false;
+    btn.textContent = syncMode === 'signup' ? '登録する' : 'ログイン';
+  }
+}
+
+async function migrateDataToUser(userId) {
+  try {
+    const deviceId = localStorage.getItem('ippo_device_id');
+    if (!deviceId) return;
+
+    // records テーブルの device_id のデータに user_id を設定
+    await supabase
+      .from('records')
+      .update({ user_id: userId })
+      .eq('device_id', deviceId)
+      .is('user_id', null);
+
+    // profiles テーブルも同様
+    await supabase
+      .from('profiles')
+      .update({ user_id: userId })
+      .eq('device_id', deviceId)
+      .is('user_id', null);
+
+  } catch (err) {
+    console.error('Migration error:', err);
+  }
+}
+
+async function syncNow() {
+  const btn = document.querySelector('.sync-action-btn.primary');
+  const original = btn.textContent;
+  btn.textContent = '同期中...';
+  btn.disabled = true;
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not logged in');
+
+    const userId = session.user.id;
+    const deviceId = localStorage.getItem('ippo_device_id');
+
+    // 現在の端末のデータをuser_idに紐付け
+    if (deviceId) {
+      await supabase
+        .from('records')
+        .update({ user_id: userId })
+        .eq('device_id', deviceId)
+        .is('user_id', null);
+    }
+
+    btn.textContent = '同期完了 ✓';
+    btn.style.background = '#8aab96';
+    
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 2000);
+
+  } catch (err) {
+    console.error('Sync error:', err);
+    btn.textContent = '同期に失敗しました';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.disabled = false;
+    }, 2000);
+  }
+}
+
+async function logoutSync() {
+  if (!confirm('ログアウトしますか？\nこの端末のデータは残りますが、他の端末との同期が無効になります。')) return;
+
+  try {
+    await supabase.auth.signOut();
+    document.getElementById('syncStatusBrief').textContent = '未ログイン';
+    renderSyncUI();
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
+}
+
+// ページ読み込み時に同期状態を確認
+(async function checkSyncStatus() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const brief = document.getElementById('syncStatusBrief');
+    if (brief) {
+      brief.textContent = session?.user?.email || '未ログイン';
+    }
+  } catch(e) {}
+})();
+  
   /* ===== AI ANALYSIS MODAL ===== */
 .ai-overlay {
   position: fixed;
@@ -5877,6 +6147,200 @@ function copyAIAnalysis() {
   cursor: pointer;
 }
 
+
+  /* ===== SYNC / AUTH MODAL ===== */
+.sync-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(44,36,32,0.5);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: flex-end;
+}
+.sync-overlay.active { display: flex; }
+.sync-sheet {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 0 0 40px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+.sync-handle {
+  width: 36px; height: 4px;
+  background: rgba(44,36,32,0.15);
+  border-radius: 2px;
+  margin: 12px auto 20px;
+}
+.sync-header {
+  padding: 0 24px 16px;
+  border-bottom: 1px solid rgba(200,180,170,0.2);
+  margin-bottom: 20px;
+}
+.sync-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.sync-subtitle { font-size: 12px; color: var(--ink-light); }
+.sync-body { padding: 0 24px; }
+
+.sync-status {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.sync-status-icon { font-size: 32px; margin-bottom: 12px; }
+.sync-status-text {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.sync-status-sub { font-size: 12px; color: var(--ink-light); }
+.sync-email-display {
+  font-size: 13px;
+  color: var(--rose);
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.sync-form {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 20px;
+}
+.sync-form-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+.sync-input {
+  width: 100%;
+  border: 1.5px solid #e8ddd8;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--cream);
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.sync-input:focus { border-color: var(--rose); }
+.sync-input::placeholder { color: var(--ink-light); font-size: 13px; }
+.sync-form-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--rose);
+  color: white;
+  margin-bottom: 8px;
+}
+.sync-form-btn:hover { background: #FF8A8A; }
+.sync-form-btn:disabled {
+  background: #e8ddd8;
+  color: var(--ink-light);
+  cursor: not-allowed;
+}
+.sync-form-toggle {
+  background: none;
+  border: none;
+  color: var(--ink-light);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px;
+  width: 100%;
+  text-align: center;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.sync-form-toggle:hover { color: var(--rose); }
+
+.sync-message {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+  display: none;
+}
+.sync-message.success {
+  display: block;
+  background: var(--sage-light);
+  color: #2d6a4f;
+}
+.sync-message.error {
+  display: block;
+  background: var(--rose-pale);
+  color: #c9747a;
+}
+.sync-message.info {
+  display: block;
+  background: var(--warm-light);
+  color: var(--ink-mid);
+}
+
+.sync-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+.sync-action-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sync-action-btn.primary { background: var(--rose); color: white; }
+.sync-action-btn.primary:hover { background: #FF8A8A; }
+.sync-action-btn.danger {
+  background: none;
+  border: 1px solid #e8ddd8;
+  color: var(--ink-light);
+}
+.sync-action-btn.danger:hover { border-color: var(--rose); color: var(--rose); }
+
+.sync-footer {
+  padding: 16px 24px 0;
+  border-top: 1px solid rgba(200,180,170,0.2);
+  margin-top: 8px;
+}
+.sync-close-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #f0ebe6;
+  color: var(--ink-mid);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
   
 </script>
 </body>

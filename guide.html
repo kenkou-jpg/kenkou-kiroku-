@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7日間チャクラ解放リセット | ippo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #fdf8f0 0%, #f5e6d3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .line-banner {
+            background: linear-gradient(135deg, #00B900 0%, #00D700 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2d6a4f 0%, #e9c46a 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .line-thanks {
+            font-size: 12px;
+            opacity: 0.85;
+            font-style: italic;
+        }
+
+        .progress-section {
+            background: #f9f5f0;
+            padding: 30px;
+            border-bottom: 2px solid #e9c46a;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2d6a4f 0%, #e9c46a 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e9c46a;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d6a4f;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .day-section {
+            margin-bottom: 40px;
+            border: 2px solid #f0e6d2;
+            border-radius: 10px;
+            padding: 25px;
+            background: #fefdfb;
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .day-number {
+            background: linear-gradient(135deg, #2d6a4f 0%, #e9c46a 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .day-title {
+            flex: 1;
+        }
+
+        .day-title h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #2d6a4f;
+        }
+
+        .day-title p {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .day-content {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9c46a;
+        }
+
+        .day-content.active {
+            display: block;
+        }
+
+        .checklist-group {
+            margin-bottom: 20px;
+        }
+
+        .checklist-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2d6a4f;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: #f5e6d3;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #2d6a4f;
+        }
+
+        .checkbox-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .metric-group {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e9c46a;
+        }
+
+        .metric-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2d6a4f;
+            margin-bottom: 10px;
+        }
+
+        .metric-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .metric-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-input-group label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metric-input-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .metric-input-group input:focus {
+            outline: none;
+            border-color: #2d6a4f;
+            box-shadow: 0 0 5px rgba(45, 106, 79, 0.3);
+        }
+
+        .metric-progress {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2d6a4f;
+            text-align: center;
+        }
+
+        .metric-progress.positive {
+            color: #27ae60;
+        }
+
+        .metric-progress.negative {
+            color: #e74c3c;
+        }
+
+        .metric-progress.zero {
+            color: #999;
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2d6a4f 0%, #e9c46a 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(45, 106, 79, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0e6d2;
+            color: #2d6a4f;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #e9c46a;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .share-section {
+            background: #f9f5f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .share-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2d6a4f;
+            margin-bottom: 10px;
+        }
+
+        .share-text {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            border: 1px solid #e9c46a;
+        }
+
+        .copy-btn {
+            background: #2d6a4f;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .copy-btn:hover {
+            background: #1f4d36;
+        }
+
+        .line-follow-section {
+            background: linear-gradient(135deg, #00B900 0%, #00D700 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .line-follow-section h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .line-follow-section p {
+            font-size: 12px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .line-follow-btn {
+            background: white;
+            color: #00B900;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .line-follow-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .footer {
+            background: #f9f5f0;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 2px solid #e9c46a;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .reset-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background: #c0392b;
+        }
+
+        .day-section.completed {
+            background: #f0f9f4;
+            border-color: #27ae60;
+        }
+
+        .day-section.completed .day-number {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .completion-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        .completion-message {
+            background: linear-gradient(135deg, #f0f9f4 0%, #e8f5e9 100%);
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .completion-message.show {
+            display: block;
+        }
+
+        .completion-message h3 {
+            color: #27ae60;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .completion-message p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .day-number {
+                margin-bottom: 10px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .day-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="line-banner">
+            🎉 LINE公式登録ありがとうございます！この特典をお楽しみください
+        </div>
+
+        <div class="header">
+            <h1>🌙 7日間チャクラ解放リセット</h1>
+            <p>あなたの女性性を取り戻す7日間のジャーニー</p>
+            <p class="line-thanks">LINE公式登録者限定特典</p>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="progress-stats">
+                <div class="stat-box">
+                    <div class="stat-label">完了したチェック</div>
+                    <div class="stat-value" id="completedCount">0/35</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">開始時の平均</div>
+                    <div class="stat-value" id="avgStart">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">終了時の平均</div>
+                    <div class="stat-value" id="avgEnd">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="completion-message" id="completionMessage">
+            <h3>🎉 7日間完了おめでとうございます！</h3>
+            <p>あなたは、自分の女性性と創造性を取り戻しました。<br>
+            この新しい自分を大切にしてください。<br><br>
+            LINE公式では、さらに詳しい情報や、次のステップをお届けしています。</p>
+        </div>
+
+        <div class="content" id="content"></div>
+
+        <div class="footer">
+            <button class="reset-btn" onclick="resetAllData()">すべてのデータをリセット</button>
+            <p style="margin-top: 15px;">このアプリはブラウザのlocalStorageにデータを保存します。<br>ブラウザのキャッシュをクリアするとデータが削除されます。</p>
+        </div>
+    </div>
+
+    <script>
+        const DAYS_DATA = [
+            {
+                day: 1,
+                title: '「完璧な体」への執着を手放す',
+                subtitle: '自分の体を受け入れることの大切さに気づく',
+                metric: '自分の体への感謝の気持ち',
+                checklist: [
+                    { id: 'day1_morning', label: '朝のアファーメーション「今のままで完璧だ」を唱える' },
+                    { id: 'day1_noon', label: '昼のアファーメーション「今のままで完璧だ」を唱える' },
+                    { id: 'day1_night', label: '夜のアファーメーション「今のままで完璧だ」を唱える' },
+                    { id: 'day1_record', label: '変化指標を記録' },
+                    { id: 'day1_share', label: 'SNSで #Day1完了 をシェア' }
+                ],
+                shareText: '🌙 #チャクラ断食メソッド #Day1完了\n\n「今のままで完璧だ」\n\n完璧主義をやめることから始まった。\n自分の体を受け入れることの大切さに気づいた。\n\n#7日間リセット #女性の健康 #スピリチュアル\n\n💚 LINE公式登録で、このプログラムを受け取りました'
+            },
+            {
+                day: 2,
+                title: '「正しい食べ方」への執着を手放す',
+                subtitle: '食べることの喜びを取り戻す',
+                metric: '体の軽さ',
+                checklist: [
+                    { id: 'day2_avoid', label: '加工食品を避けた' },
+                    { id: 'day2_add', label: '自然な食材を1つ追加した' },
+                    { id: 'day2_gratitude', label: '食べる時に「この食べ物が、私の体を癒してくれる」と唱えた' },
+                    { id: 'day2_record', label: '変化指標を記録' },
+                    { id: 'day2_share', label: 'SNSで #Day2完了 をシェア' }
+                ],
+                shareText: '🌙 #チャクラ断食メソッド #Day2完了\n\n食べ物への執着をやめた。\n自然な食材の味わいに気づいた。\n\n#7日間リセット #食事療法 #女性の健康\n\n💚 LINE公式登録で、このプログラムを受け取りました'
+            },
+            {
+                day: 3,
+                title: '「スマホ依存」を手放す',
+                subtitle: '自分の内面と向き合う時間を持つ',
+                metric: '心の静けさ',
+                checklist: [
+                    { id: 'day3_no_phone', label: '21時以降、スマホを使用しなかった' },
+                    { id: 'day3_meditation', label: '瞑想・日記・ヨガを実施した' },
+                    { id: 'day3_record', label: '変化指標を記録' },
+                    { id: 'day3_share', label: 'SNSで #Day3完了 をシェア' }
+                ],
+                shareText: '🌙 #チャクラ断食メソッド #Day3完了\n\nスマホから離れた。\n自分の内面と向き合う時間を持った。\n\n#7日間リセット #デジタルデトックス #瞑想\n\n💚 LINE公式登録で、このプログラムを受け取りました'
+            },
+            {
+                day: 4,
+                title: '「自分への批判」を手放す',
+                subtitle: '自分を許し、自分に優しくなる',
+                metric: '自分への優しさ',
+                checklist: [
+                    { id: 'day4_criticism', label: '自分を責める言葉に気づいた' },
+                    { id: 'day4_positive', label: 'ポジティブな言葉を3つ言った' },
+                    { id: 'day4_record', label: '変化指標を記録' },
+                    { id: 'day4_share', label: 'SNSで #Day4完了 をシェア' }
+                ],
+                shareText: '🌙 #チャクラ断食メソッド #Day4完了\n\n自分への批判をやめた。\n自分を許すことの大切さに気づいた。\n\n#7日間リセット #セルフラブ #女性の健康\n\n💚 LINE公式登録で、このプログラムを受け取りました'
+            },
+            {
+                day: 5,
+                title: '「無理な運動」を手放す',
+                subtitle: '体が喜ぶ動きを発見する',
+                metric: '体の喜び',
+                checklist: [
+                    { id: 'day5_no_exercise', label: 'つらい運動をしなかった' },
+                    { id: 'day5_movement', label: '気持ちいい動きを実施した' },
+                    { id: 'day5_record', label: '変化指標を記録' },
+                    { id: 'day5_share', label: 'SNSで #Day5完了 をシェア' }
+                ],
+                shareText: '🌙 #チャクラ断食メソッド #Day5完了\n\n無理な運動をやめた。\n体が喜ぶ動きを発見した。\n\n#7日間リセット #ヨガ #セルフケア\n\n💚 LINE公式登録で、このプログラムを受け取りました'
+            },
+            {
+                day: 6,
+                title: '「他者の期待」を手放す',
+                subtitle: '自分の本当の気持ちに気づく',
+                metric: '自分らしさ',
+                checklist: [
+                    { id: 'day6_expectation', label: '他者の期待に応えることをしなかった' },
+                    { id: 'day6_feelings', label: '自分の本当の気持ちを聞いた' },
+                    { id: 'day6_record', label: '変化指標を記録' },
+                    { id: 'day6_share', label: 'SNSで #Day6完了 をシェア' }
+                ],
+                shareText: '🌙 #チャクラ断食メソッド #Day6完了\n\n他者の期待をやめた。\n自分の本当の気持ちに気づいた。\n\n#7日間リセット #自分らしさ #女性の自立\n\n💚 LINE公式登録で、このプログラムを受け取りました'
+            },
+            {
+                day: 7,
+                title: '「医学的正解」を手放す',
+                subtitle: '自分の直感を信じることを始める',
+                metric: '自分への信頼',
+                checklist: [
+                    { id: 'day7_medical', label: '医学的正解への執着を手放した' },
+                    { id: 'day7_intuition', label: '自分の直感を信じる練習をした' },
+                    { id: 'day7_record', label: '変化指標を記録' },
+                    { id: 'day7_share', label: 'SNSで #Day7完了 をシェア' }
+                ],
+                shareText: '🌙 #チャクラ断食メソッド #Day7完了\n\n医学的正解だけを求めることをやめた。\n自分の直感を信じることを始めた。\n\n新しい自分として、明日から始まる。\n\n#7日間リセット #自分の直感 #女性の力\n\n💚 LINE公式登録で、このプログラムを受け取りました'
+            }
+        ];
+
+        // Initialize app
+        function init() {
+            renderDays();
+            updateProgress();
+        }
+
+        // Render all days
+        function renderDays() {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
+
+            DAYS_DATA.forEach(dayData => {
+                const daySection = createDaySection(dayData);
+                content.appendChild(daySection);
+            });
+        }
+
+        // Create day section
+        function createDaySection(dayData) {
+            const section = document.createElement('div');
+            section.className = 'day-section';
+            section.id = `day-${dayData.day}`;
+
+            const header = document.createElement('div');
+            header.className = 'day-header';
+            header.onclick = () => toggleDayContent(dayData.day);
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = `Day ${dayData.day}`;
+
+            const dayTitle = document.createElement('div');
+            dayTitle.className = 'day-title';
+            dayTitle.innerHTML = `
+                <h2>${dayData.title}</h2>
+                <p>${dayData.subtitle}</p>
+            `;
+
+            header.appendChild(dayNumber);
+            header.appendChild(dayTitle);
+            section.appendChild(header);
+
+            const content = document.createElement('div');
+            content.className = 'day-content';
+            content.id = `day-${dayData.day}-content`;
+
+            // Checklist
+            const checklistGroup = document.createElement('div');
+            checklistGroup.className = 'checklist-group';
+            checklistGroup.innerHTML = '<div class="checklist-title">✓ チェックリスト</div>';
+
+            dayData.checklist.forEach(item => {
+                const checkboxItem = document.createElement('div');
+                checkboxItem.className = 'checkbox-item';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = item.id;
+                checkbox.onchange = () => {
+                    saveData();
+                    updateProgress();
+                    updateDayCompletion(dayData.day);
+                };
+
+                const label = document.createElement('label');
+                label.htmlFor = item.id;
+                label.textContent = item.label;
+
+                checkboxItem.appendChild(checkbox);
+                checkboxItem.appendChild(label);
+                checklistGroup.appendChild(checkboxItem);
+            });
+
+            content.appendChild(checklistGroup);
+
+            // Metric
+            const metricGroup = document.createElement('div');
+            metricGroup.className = 'metric-group';
+
+            const metricTitle = document.createElement('div');
+            metricTitle.className = 'metric-title';
+            metricTitle.textContent = `📊 変化指標：「${dayData.metric}」`;
+
+            const metricInputs = document.createElement('div');
+            metricInputs.className = 'metric-inputs';
+
+            // Start score
+            const startGroup = document.createElement('div');
+            startGroup.className = 'metric-input-group';
+            startGroup.innerHTML = `
+                <label>開始時</label>
+                <input type="number" id="day${dayData.day}_start" min="1" max="10" value="5" onchange="updateProgress(); saveData();">
+            `;
+
+            // End score
+            const endGroup = document.createElement('div');
+            endGroup.className = 'metric-input-group';
+            endGroup.innerHTML = `
+                <label>終了時</label>
+                <input type="number" id="day${dayData.day}_end" min="1" max="10" value="5" onchange="updateProgress(); saveData();">
+            `;
+
+            // Progress
+            const progressGroup = document.createElement('div');
+            progressGroup.className = 'metric-input-group';
+            progressGroup.innerHTML = `
+                <label>進捗</label>
+                <div class="metric-progress" id="day${dayData.day}_progress">+0</div>
+            `;
+
+            metricInputs.appendChild(startGroup);
+            metricInputs.appendChild(endGroup);
+            metricInputs.appendChild(progressGroup);
+
+            const scaleLabels = document.createElement('div');
+            scaleLabels.className = 'scale-labels';
+            scaleLabels.innerHTML = '<span>1 = 低い</span><span>10 = 高い</span>';
+
+            metricGroup.appendChild(metricTitle);
+            metricGroup.appendChild(metricInputs);
+            metricGroup.appendChild(scaleLabels);
+
+            content.appendChild(metricGroup);
+
+            // Share section
+            const shareSection = document.createElement('div');
+            shareSection.className = 'share-section';
+            shareSection.innerHTML = `
+                <div class="share-title">📱 SNSでシェア</div>
+                <div class="share-text">${dayData.shareText.replace(/\n/g, '<br>')}</div>
+                <button class="copy-btn" onclick="copyToClipboard('${dayData.shareText.replace(/'/g, "\\'")}')">コピーしてシェア</button>
+            `;
+
+            content.appendChild(shareSection);
+
+            // LINE Follow section (only on Day 7)
+            if (dayData.day === 7) {
+                const lineFollowSection = document.createElement('div');
+                lineFollowSection.className = 'line-follow-section';
+                lineFollowSection.innerHTML = `
+                    <h3>💚 LINE公式をフォローして、次のステップへ</h3>
+                    <p>7日間完了後は、LINE公式で、さらに詳しい情報や、次のステップをお届けしています。</p>
+                    <button class="line-follow-btn" onclick="alert('LINE公式アカウントのQRコードをスキャンするか、以下のリンクからフォローしてください。\\n\\n※ここにLINE公式アカウントのリンクを設定してください')">LINE公式をフォロー</button>
+                `;
+                content.appendChild(lineFollowSection);
+            }
+
+            section.appendChild(content);
+
+            return section;
+        }
+
+        // Toggle day content
+        function toggleDayContent(day) {
+            const content = document.getElementById(`day-${day}-content`);
+            content.classList.toggle('active');
+        }
+
+        // Update progress
+        function updateProgress() {
+            let totalCheckboxes = 0;
+            let checkedCheckboxes = 0;
+            let totalStartScore = 0;
+            let totalEndScore = 0;
+            let daysWithScores = 0;
+
+            DAYS_DATA.forEach(dayData => {
+                // Count checkboxes
+                dayData.checklist.forEach(item => {
+                    totalCheckboxes++;
+                    const checkbox = document.getElementById(item.id);
+                    if (checkbox && checkbox.checked) {
+                        checkedCheckboxes++;
+                    }
+                });
+
+                // Calculate metrics
+                const startInput = document.getElementById(`day${dayData.day}_start`);
+                const endInput = document.getElementById(`day${dayData.day}_end`);
+                const progressDiv = document.getElementById(`day${dayData.day}_progress`);
+
+                if (startInput && endInput) {
+                    const start = parseInt(startInput.value) || 0;
+                    const end = parseInt(endInput.value) || 0;
+                    const progress = end - start;
+
+                    // Update progress display
+                    progressDiv.textContent = progress >= 0 ? `+${progress}` : `${progress}`;
+                    progressDiv.className = 'metric-progress';
+                    if (progress > 0) {
+                        progressDiv.classList.add('positive');
+                    } else if (progress < 0) {
+                        progressDiv.classList.add('negative');
+                    } else {
+                        progressDiv.classList.add('zero');
+                    }
+
+                    totalStartScore += start;
+                    totalEndScore += end;
+                    daysWithScores++;
+                }
+
+                // Update day completion
+                updateDayCompletion(dayData.day);
+            });
+
+            // Update overall progress
+            const progressPercent = totalCheckboxes > 0 ? Math.round((checkedCheckboxes / totalCheckboxes) * 100) : 0;
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = progressPercent + '%';
+            progressFill.textContent = progressPercent + '%';
+
+            document.getElementById('completedCount').textContent = `${checkedCheckboxes}/${totalCheckboxes}`;
+
+            // Update average scores
+            const avgStart = daysWithScores > 0 ? (totalStartScore / daysWithScores).toFixed(1) : '-';
+            const avgEnd = daysWithScores > 0 ? (totalEndScore / daysWithScores).toFixed(1) : '-';
+
+            document.getElementById('avgStart').textContent = avgStart;
+            document.getElementById('avgEnd').textContent = avgEnd;
+
+            // Check if all completed
+            if (progressPercent === 100) {
+                document.getElementById('completionMessage').classList.add('show');
+            } else {
+                document.getElementById('completionMessage').classList.remove('show');
+            }
+        }
+
+        // Update day completion status
+        function updateDayCompletion(day) {
+            const daySection = document.getElementById(`day-${day}`);
+            const dayData = DAYS_DATA[day - 1];
+            
+            let allChecked = true;
+            dayData.checklist.forEach(item => {
+                const checkbox = document.getElementById(item.id);
+                if (!checkbox || !checkbox.checked) {
+                    allChecked = false;
+                }
+            });
+
+            if (allChecked) {
+                daySection.classList.add('completed');
+            } else {
+                daySection.classList.remove('completed');
+            }
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('コピーしました！SNSにペーストしてシェアしてください。');
+            });
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            const data = {};
+
+            DAYS_DATA.forEach(dayData => {
+                dayData.checklist.forEach(item => {
+                    const checkbox = document.getElementById(item.id);
+                    if (checkbox) {
+                        data[item.id] = checkbox.checked;
+                    }
+                });
+
+                const startInput = document.getElementById(`day${dayData.day}_start`);
+                const endInput = document.getElementById(`day${dayData.day}_end`);
+
+                if (startInput) {
+                    data[`day${dayData.day}_start`] = startInput.value;
+                }
+                if (endInput) {
+                    data[`day${dayData.day}_end`] = endInput.value;
+                }
+            });
+
+            localStorage.setItem('chakraResetData', JSON.stringify(data));
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const data = localStorage.getItem('chakraResetData');
+            if (!data) return;
+
+            const parsedData = JSON.parse(data);
+
+            Object.keys(parsedData).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = parsedData[key];
+                    } else {
+                        element.value = parsedData[key];
+                    }
+                }
+            });
+
+            updateProgress();
+        }
+
+        // Reset all data
+        function resetAllData() {
+            if (confirm('すべてのデータを削除してもよろしいですか？この操作は取り消せません。')) {
+                localStorage.removeItem('chakraResetData');
+                location.reload();
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            init();
+            loadData();
+        });
+    </script>
+</body>
+</html>

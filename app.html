@@ -1037,147 +1037,6 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
   z-index: 1;
 }
 
-  <!-- Premium Features -->
-<div class="settings-section">
-  <div class="settings-section-title">Premium</div>
-</div>
-<div class="premium-feature-section">
-  <div class="pf-card" onclick="openDoctorSummary()">
-    <div class="pf-icon">🩺</div>
-    <div class="pf-text">
-      <div class="pf-title">婦人科受診サポート</div>
-      <div class="pf-sub">過去30日の体調サマリーを自動生成</div>
-    </div>
-    <div class="pf-arrow">→</div>
-  </div>
-<div class="pf-card" onclick="openMonthlyReport()">
-    <div class="pf-icon">📊</div>
-    <div class="pf-text">
-      <div class="pf-title">月次レポート（PDF）</div>
-      <div class="pf-sub">月ごとの体調データを可視化</div>
-    </div>
-    <div class="pf-arrow">→</div>
-  </div>
-<div class="pf-card" onclick="openAIAnalysis()">
-    <div class="pf-icon">✨</div>
-    <div class="pf-text">
-      <div class="pf-title">AIパターン解析</div>
-      <div class="pf-sub">90日分の記録からパターンを発見</div>
-    </div>
-    <div class="pf-arrow">→</div>
-  </div>
-<div class="pf-card" onclick="openSyncModal()">
-    <div class="pf-icon">🔄</div>
-    <div class="pf-text">
-      <div class="pf-title">デバイス間同期</div>
-      <div class="pf-sub" id="syncStatusBrief">未ログイン</div>
-    </div>
-    <div class="pf-arrow">→</div>
-  </div>
-<div class="pf-card" onclick="openArchive()">
-    <div class="pf-icon">💬</div>
-    <div class="pf-text">
-      <div class="pf-title">みんなの声アーカイブ</div>
-      <div class="pf-sub">過去のテーマと投稿を閲覧・検索</div>
-    </div>
-    <div class="pf-arrow">→</div>
-  </div>
-
-<!-- Doctor Summary Modal -->
-<div class="ds-overlay" id="doctorSummaryOverlay">
-  <div class="ds-sheet">
-    <div class="ds-handle"></div>
-    <div class="ds-header">
-      <div class="ds-title">婦人科受診サポート</div>
-      <div class="ds-subtitle">過去30日間の体調サマリー</div>
-    </div>
-    <div class="ds-body" id="doctorSummaryBody">
-      <div class="ds-empty">読み込み中...</div>
-    </div>
-    <div class="ds-disclaimer">
-      ※ このサマリーは医学的診断ではありません。記録データを整理して表示しています。<br>
-      受診の際の参考資料としてご活用ください。
-    </div>
-    <div class="ds-footer">
-      <button class="ds-btn secondary" onclick="closeDoctorSummary()">閉じる</button>
-      <button class="ds-btn primary" onclick="copyDoctorSummary()">テキストをコピー</button>
-    </div>
-  </div>
-</div>
-
-
-  <!-- Monthly Report Modal -->
-<div class="mr-overlay" id="monthlyReportOverlay">
-  <div class="mr-sheet">
-    <div class="mr-handle"></div>
-    <div class="mr-header">
-      <div class="mr-title">月次レポート</div>
-      <div class="mr-subtitle">月ごとの体調データを可視化</div>
-    </div>
-    <div class="mr-body">
-      <div class="mr-month-selector">
-        <button class="mr-month-btn" onclick="changeReportMonth(-1)">←</button>
-        <div class="mr-month-label" id="mrMonthLabel">2026年4月</div>
-        <button class="mr-month-btn" onclick="changeReportMonth(1)">→</button>
-      </div>
-      <div id="monthlyReportBody">
-        <div class="mr-generating">読み込み中...</div>
-      </div>
-    </div>
-    <div class="mr-footer">
-      <button class="mr-btn secondary" onclick="closeMonthlyReport()">閉じる</button>
-      <button class="mr-btn primary" onclick="downloadReportPDF()">PDF ダウンロード</button>
-    </div>
-  </div>
-</div>
-
-<!-- AI Analysis Modal -->
-<div class="ai-overlay" id="aiAnalysisOverlay">
-  <div class="ai-sheet">
-    <div class="ai-handle"></div>
-    <div class="ai-header">
-      <div class="ai-title">AIパターン解析</div>
-      <div class="ai-subtitle">あなたの記録データからパターンを読み解きます</div>
-    </div>
-    <div class="ai-body" id="aiAnalysisBody">
-      <div class="ai-loading">
-        <div class="ai-loading-icon">✨</div>
-        <div class="ai-loading-text">読み込み中...</div>
-      </div>
-    </div>
-    <div class="ai-footer">
-      <button class="ai-btn secondary" onclick="closeAIAnalysis()">閉じる</button>
-      <button class="ai-btn primary" onclick="copyAIAnalysis()">テキストをコピー</button>
-    </div>
-  </div>
-</div>
-
-  <!-- Sync Modal -->
-<div class="sync-overlay" id="syncOverlay">
-  <div class="sync-sheet">
-    <div class="sync-handle"></div>
-    <div class="sync-header">
-      <div class="sync-title">デバイス間同期</div>
-      <div class="sync-subtitle">ログインすると、PC・スマホで同じデータにアクセスできます</div>
-    </div>
-    <div class="sync-body" id="syncBody">
-      <!-- JS で動的に生成 -->
-    </div>
-    <div class="sync-footer">
-      <button class="sync-close-btn" onclick="closeSyncModal()">閉じる</button>
-    </div>
-  </div>
-</div>
-
-  <!-- Community Archive Modal -->
-<div class="archive-overlay" id="archiveOverlay">
-  <div class="archive-sheet">
-    <div class="archive-handle"></div>
-    <div class="archive-header">
-      <div class="archive-title">みんなの声アーカイブ</div>
-      <div class="archive-subtitle">過去のテーマと投稿を振り返る</div>
-    </div>
-
     <div class="archive-search">
       <input type="text" class="archive-search-input" id="archiveSearchInput" placeholder="キーワードで検索..." oninput="searchArchive()">
     </div>
@@ -2250,6 +2109,147 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
           </div>
         </div>
       </div>
+
+       <!-- Premium Features -->
+<div class="settings-section">
+  <div class="settings-section-title">Premium</div>
+</div>
+<div class="premium-feature-section">
+  <div class="pf-card" onclick="openDoctorSummary()">
+    <div class="pf-icon">🩺</div>
+    <div class="pf-text">
+      <div class="pf-title">婦人科受診サポート</div>
+      <div class="pf-sub">過去30日の体調サマリーを自動生成</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+<div class="pf-card" onclick="openMonthlyReport()">
+    <div class="pf-icon">📊</div>
+    <div class="pf-text">
+      <div class="pf-title">月次レポート（PDF）</div>
+      <div class="pf-sub">月ごとの体調データを可視化</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+<div class="pf-card" onclick="openAIAnalysis()">
+    <div class="pf-icon">✨</div>
+    <div class="pf-text">
+      <div class="pf-title">AIパターン解析</div>
+      <div class="pf-sub">90日分の記録からパターンを発見</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+<div class="pf-card" onclick="openSyncModal()">
+    <div class="pf-icon">🔄</div>
+    <div class="pf-text">
+      <div class="pf-title">デバイス間同期</div>
+      <div class="pf-sub" id="syncStatusBrief">未ログイン</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+<div class="pf-card" onclick="openArchive()">
+    <div class="pf-icon">💬</div>
+    <div class="pf-text">
+      <div class="pf-title">みんなの声アーカイブ</div>
+      <div class="pf-sub">過去のテーマと投稿を閲覧・検索</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+
+<!-- Doctor Summary Modal -->
+<div class="ds-overlay" id="doctorSummaryOverlay">
+  <div class="ds-sheet">
+    <div class="ds-handle"></div>
+    <div class="ds-header">
+      <div class="ds-title">婦人科受診サポート</div>
+      <div class="ds-subtitle">過去30日間の体調サマリー</div>
+    </div>
+    <div class="ds-body" id="doctorSummaryBody">
+      <div class="ds-empty">読み込み中...</div>
+    </div>
+    <div class="ds-disclaimer">
+      ※ このサマリーは医学的診断ではありません。記録データを整理して表示しています。<br>
+      受診の際の参考資料としてご活用ください。
+    </div>
+    <div class="ds-footer">
+      <button class="ds-btn secondary" onclick="closeDoctorSummary()">閉じる</button>
+      <button class="ds-btn primary" onclick="copyDoctorSummary()">テキストをコピー</button>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Monthly Report Modal -->
+<div class="mr-overlay" id="monthlyReportOverlay">
+  <div class="mr-sheet">
+    <div class="mr-handle"></div>
+    <div class="mr-header">
+      <div class="mr-title">月次レポート</div>
+      <div class="mr-subtitle">月ごとの体調データを可視化</div>
+    </div>
+    <div class="mr-body">
+      <div class="mr-month-selector">
+        <button class="mr-month-btn" onclick="changeReportMonth(-1)">←</button>
+        <div class="mr-month-label" id="mrMonthLabel">2026年4月</div>
+        <button class="mr-month-btn" onclick="changeReportMonth(1)">→</button>
+      </div>
+      <div id="monthlyReportBody">
+        <div class="mr-generating">読み込み中...</div>
+      </div>
+    </div>
+    <div class="mr-footer">
+      <button class="mr-btn secondary" onclick="closeMonthlyReport()">閉じる</button>
+      <button class="mr-btn primary" onclick="downloadReportPDF()">PDF ダウンロード</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Analysis Modal -->
+<div class="ai-overlay" id="aiAnalysisOverlay">
+  <div class="ai-sheet">
+    <div class="ai-handle"></div>
+    <div class="ai-header">
+      <div class="ai-title">AIパターン解析</div>
+      <div class="ai-subtitle">あなたの記録データからパターンを読み解きます</div>
+    </div>
+    <div class="ai-body" id="aiAnalysisBody">
+      <div class="ai-loading">
+        <div class="ai-loading-icon">✨</div>
+        <div class="ai-loading-text">読み込み中...</div>
+      </div>
+    </div>
+    <div class="ai-footer">
+      <button class="ai-btn secondary" onclick="closeAIAnalysis()">閉じる</button>
+      <button class="ai-btn primary" onclick="copyAIAnalysis()">テキストをコピー</button>
+    </div>
+  </div>
+</div>
+
+  <!-- Sync Modal -->
+<div class="sync-overlay" id="syncOverlay">
+  <div class="sync-sheet">
+    <div class="sync-handle"></div>
+    <div class="sync-header">
+      <div class="sync-title">デバイス間同期</div>
+      <div class="sync-subtitle">ログインすると、PC・スマホで同じデータにアクセスできます</div>
+    </div>
+    <div class="sync-body" id="syncBody">
+      <!-- JS で動的に生成 -->
+    </div>
+    <div class="sync-footer">
+      <button class="sync-close-btn" onclick="closeSyncModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+  <!-- Community Archive Modal -->
+<div class="archive-overlay" id="archiveOverlay">
+  <div class="archive-sheet">
+    <div class="archive-handle"></div>
+    <div class="archive-header">
+      <div class="archive-title">みんなの声アーカイブ</div>
+      <div class="archive-subtitle">過去のテーマと投稿を振り返る</div>
+    </div>
 
       <!-- Data -->
       <div class="settings-section">

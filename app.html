@@ -1052,11 +1052,11 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
     </div>
     <div class="pf-arrow">→</div>
   </div>
-  <div class="pf-card" style="opacity:0.5;pointer-events:none;">
+<div class="pf-card" onclick="openMonthlyReport()">
     <div class="pf-icon">📊</div>
     <div class="pf-text">
       <div class="pf-title">月次レポート（PDF）</div>
-      <div class="pf-sub">近日公開</div>
+      <div class="pf-sub">月ごとの体調データを可視化</div>
     </div>
     <div class="pf-arrow">→</div>
   </div>
@@ -1107,6 +1107,33 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
     </div>
   </div>
 </div>
+
+
+  <!-- Monthly Report Modal -->
+<div class="mr-overlay" id="monthlyReportOverlay">
+  <div class="mr-sheet">
+    <div class="mr-handle"></div>
+    <div class="mr-header">
+      <div class="mr-title">月次レポート</div>
+      <div class="mr-subtitle">月ごとの体調データを可視化</div>
+    </div>
+    <div class="mr-body">
+      <div class="mr-month-selector">
+        <button class="mr-month-btn" onclick="changeReportMonth(-1)">←</button>
+        <div class="mr-month-label" id="mrMonthLabel">2026年4月</div>
+        <button class="mr-month-btn" onclick="changeReportMonth(1)">→</button>
+      </div>
+      <div id="monthlyReportBody">
+        <div class="mr-generating">読み込み中...</div>
+      </div>
+    </div>
+    <div class="mr-footer">
+      <button class="mr-btn secondary" onclick="closeMonthlyReport()">閉じる</button>
+      <button class="mr-btn primary" onclick="downloadReportPDF()">PDF ダウンロード</button>
+    </div>
+  </div>
+</div>
+
 
 
 /* ===== FEEDBACK ===== */
@@ -1432,6 +1459,196 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
   color: var(--ink-light);
   line-height: 1.7;
   text-align: center;
+}
+
+  /* ===== MONTHLY REPORT MODAL ===== */
+.mr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(44,36,32,0.5);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: flex-end;
+}
+.mr-overlay.active { display: flex; }
+.mr-sheet {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 0 0 40px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+.mr-handle {
+  width: 36px; height: 4px;
+  background: rgba(44,36,32,0.15);
+  border-radius: 2px;
+  margin: 12px auto 20px;
+}
+.mr-header {
+  padding: 0 24px 16px;
+  border-bottom: 1px solid rgba(200,180,170,0.2);
+  margin-bottom: 20px;
+}
+.mr-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.mr-subtitle { font-size: 12px; color: var(--ink-light); }
+.mr-body { padding: 0 24px; }
+.mr-month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.mr-month-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(200,180,170,0.3);
+  background: var(--white);
+  color: var(--ink-light);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.mr-month-btn:hover { border-color: var(--rose); color: var(--rose); }
+.mr-month-label {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 18px;
+  color: var(--ink);
+  min-width: 140px;
+  text-align: center;
+}
+.mr-preview {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 20px;
+}
+.mr-preview-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 16px;
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 4px;
+}
+.mr-preview-period {
+  font-size: 11px;
+  color: var(--ink-light);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.mr-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.mr-stat-box {
+  background: var(--rose-pale);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+.mr-stat-num {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 24px;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.mr-stat-label {
+  font-size: 10px;
+  color: var(--ink-light);
+}
+.mr-chart-section { margin-bottom: 16px; }
+.mr-chart-title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.mr-bar-chart { display: flex; flex-direction: column; gap: 8px; }
+.mr-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mr-bar-label {
+  font-size: 11px;
+  color: var(--ink-mid);
+  width: 80px;
+  flex-shrink: 0;
+  text-align: right;
+}
+.mr-bar-track {
+  flex: 1;
+  height: 20px;
+  background: #f0ebe6;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.mr-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--rose-light), var(--rose));
+  transition: width 0.8s ease;
+  min-width: 2px;
+}
+.mr-bar-count {
+  font-size: 11px;
+  color: var(--ink-light);
+  width: 30px;
+  flex-shrink: 0;
+}
+.mr-summary-text {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.8;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--rose-pale), var(--warm-light));
+  border-radius: 14px;
+  border-left: 3px solid var(--rose);
+}
+.mr-footer {
+  padding: 16px 24px 0;
+  border-top: 1px solid rgba(200,180,170,0.2);
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+}
+.mr-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mr-btn.primary { background: var(--rose); color: white; }
+.mr-btn.primary:hover { background: #FF8A8A; }
+.mr-btn.secondary { background: #f0ebe6; color: var(--ink-mid); }
+.mr-generating {
+  text-align: center;
+  padding: 20px;
+  font-size: 13px;
+  color: var(--ink-light);
 }
 
 </style>
@@ -4887,6 +5104,330 @@ function copyDoctorSummary() {
     document.body.removeChild(ta);
   });
 }
+
+  // ===== MONTHLY REPORT (月次レポート) =====
+
+let reportYear = new Date().getFullYear();
+let reportMonth = new Date().getMonth(); // 0-indexed
+
+function openMonthlyReport() {
+  reportYear = new Date().getFullYear();
+  reportMonth = new Date().getMonth();
+  document.getElementById('monthlyReportOverlay').classList.add('active');
+  updateMonthLabel();
+  generateMonthlyReport();
+}
+
+function closeMonthlyReport() {
+  document.getElementById('monthlyReportOverlay').classList.remove('active');
+}
+
+document.getElementById('monthlyReportOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeMonthlyReport();
+});
+
+function changeReportMonth(delta) {
+  reportMonth += delta;
+  if (reportMonth > 11) { reportMonth = 0; reportYear++; }
+  if (reportMonth < 0) { reportMonth = 11; reportYear--; }
+  updateMonthLabel();
+  generateMonthlyReport();
+}
+
+function updateMonthLabel() {
+  document.getElementById('mrMonthLabel').textContent = reportYear + '年' + (reportMonth + 1) + '月';
+}
+
+async function generateMonthlyReport() {
+  const body = document.getElementById('monthlyReportBody');
+  body.innerHTML = '<div class="mr-generating">データを読み込み中...</div>';
+
+  try {
+    const firstDay = new Date(reportYear, reportMonth, 1);
+    const lastDay = new Date(reportYear, reportMonth + 1, 0);
+    const fromDate = firstDay.toISOString().split('T')[0];
+    const toDate = lastDay.toISOString().split('T')[0];
+    const daysInMonth = lastDay.getDate();
+
+    const { data: records, error } = await supabase
+      .from('records')
+      .select('*')
+      .gte('record_date', fromDate)
+      .lte('record_date', toDate)
+      .order('record_date', { ascending: true });
+
+    if (error) throw error;
+
+    if (!records || records.length === 0) {
+      body.innerHTML = '<div class="ds-empty">この月の記録はありません。</div>';
+      return;
+    }
+
+    // 集計
+    const totalDays = records.length;
+    const chakraCounts = {};
+    const emotionCounts = {};
+    const symptomCounts = {};
+    const temperatures = [];
+    const fastingHours = [];
+    let mealRecordDays = 0;
+    let noteCount = 0;
+    const scores = [];
+
+    records.forEach(r => {
+      const d = r.data || {};
+      if (d.chakra) chakraCounts[d.chakra] = (chakraCounts[d.chakra] || 0) + 1;
+      if (d.emotion) emotionCounts[d.emotion] = (emotionCounts[d.emotion] || 0) + 1;
+      if (d.symptoms && d.symptoms.length > 0) {
+        d.symptoms.forEach(s => { symptomCounts[s] = (symptomCounts[s] || 0) + 1; });
+      }
+      if (d.temperature) temperatures.push(parseFloat(d.temperature));
+      if (d.meals && (d.meals.morning || d.meals.lunch || d.meals.dinner)) mealRecordDays++;
+      if (d.note && d.note.trim()) noteCount++;
+      if (d.score) scores.push(Number(d.score));
+      if (d.firstMealTime && d.lastMealTime) {
+        const first = d.firstMealTime.split(':').map(Number);
+        const last = d.lastMealTime.split(':').map(Number);
+        const eating = (last[0] * 60 + last[1]) - (first[0] * 60 + first[1]);
+        if (eating > 0) fastingHours.push(24 - (eating / 60));
+      }
+    });
+
+    let html = '';
+
+    // プレビューカード
+    html += '<div class="mr-preview">';
+    html += '<div class="mr-preview-title">ippo 月次レポート</div>';
+    html += '<div class="mr-preview-period">' + fromDate + ' 〜 ' + toDate + '</div>';
+
+    // 統計グリッド
+    html += '<div class="mr-stat-grid">';
+    html += '<div class="mr-stat-box"><div class="mr-stat-num">' + totalDays + '</div><div class="mr-stat-label">記録日数 / ' + daysInMonth + '日</div></div>';
+    html += '<div class="mr-stat-box"><div class="mr-stat-num">' + Math.round(totalDays / daysInMonth * 100) + '%</div><div class="mr-stat-label">記録率</div></div>';
+
+    if (temperatures.length > 0) {
+      const avgTemp = (temperatures.reduce((a, b) => a + b, 0) / temperatures.length).toFixed(2);
+      html += '<div class="mr-stat-box"><div class="mr-stat-num">' + avgTemp + '</div><div class="mr-stat-label">平均基礎体温 ℃</div></div>';
+    }
+    if (fastingHours.length > 0) {
+      const avgFast = (fastingHours.reduce((a, b) => a + b, 0) / fastingHours.length).toFixed(1);
+      html += '<div class="mr-stat-box"><div class="mr-stat-num">' + avgFast + '</div><div class="mr-stat-label">平均断食時間 h</div></div>';
+    }
+    if (scores.length > 0) {
+      const avgScore = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+      html += '<div class="mr-stat-box"><div class="mr-stat-num">' + avgScore + '</div><div class="mr-stat-label">平均体調スコア</div></div>';
+    }
+    html += '<div class="mr-stat-box"><div class="mr-stat-num">' + mealRecordDays + '</div><div class="mr-stat-label">食事記録日</div></div>';
+    html += '</div>';
+
+    // チャクラ棒グラフ
+    if (Object.keys(chakraCounts).length > 0) {
+      const chakraNames = {
+        'root': 'ルート', 'sacral': '仙骨', 'solar': '太陽神経叢',
+        'heart': 'ハート', 'throat': '喉', 'third-eye': '第三の目', 'crown': 'クラウン'
+      };
+      const maxChakra = Math.max(...Object.values(chakraCounts));
+      html += '<div class="mr-chart-section">';
+      html += '<div class="mr-chart-title">チャクラの傾向</div>';
+      html += '<div class="mr-bar-chart">';
+      Object.entries(chakraCounts).sort((a, b) => b[1] - a[1]).forEach(([key, count]) => {
+        const pct = Math.round(count / maxChakra * 100);
+        const name = chakraNames[key] || key;
+        html += '<div class="mr-bar-row">';
+        html += '<div class="mr-bar-label">' + name + '</div>';
+        html += '<div class="mr-bar-track"><div class="mr-bar-fill" style="width:' + pct + '%"></div></div>';
+        html += '<div class="mr-bar-count">' + count + '日</div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // 感情棒グラフ
+    if (Object.keys(emotionCounts).length > 0) {
+      const maxEmotion = Math.max(...Object.values(emotionCounts));
+      html += '<div class="mr-chart-section">';
+      html += '<div class="mr-chart-title">感情・気分の傾向</div>';
+      html += '<div class="mr-bar-chart">';
+      Object.entries(emotionCounts).sort((a, b) => b[1] - a[1]).forEach(([key, count]) => {
+        const pct = Math.round(count / maxEmotion * 100);
+        html += '<div class="mr-bar-row">';
+        html += '<div class="mr-bar-label">' + key + '</div>';
+        html += '<div class="mr-bar-track"><div class="mr-bar-fill" style="width:' + pct + '%"></div></div>';
+        html += '<div class="mr-bar-count">' + count + '日</div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // 症状棒グラフ
+    if (Object.keys(symptomCounts).length > 0) {
+      const maxSymptom = Math.max(...Object.values(symptomCounts));
+      html += '<div class="mr-chart-section">';
+      html += '<div class="mr-chart-title">記録された症状</div>';
+      html += '<div class="mr-bar-chart">';
+      Object.entries(symptomCounts).sort((a, b) => b[1] - a[1]).forEach(([key, count]) => {
+        const pct = Math.round(count / maxSymptom * 100);
+        html += '<div class="mr-bar-row">';
+        html += '<div class="mr-bar-label">' + key + '</div>';
+        html += '<div class="mr-bar-track"><div class="mr-bar-fill" style="width:' + pct + '%"></div></div>';
+        html += '<div class="mr-bar-count">' + count + '日</div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // サマリーテキスト
+    html += '<div class="mr-summary-text">';
+    html += reportYear + '年' + (reportMonth + 1) + '月は、' + daysInMonth + '日中 ' + totalDays + '日の記録がありました。';
+    if (temperatures.length > 0) {
+      const avgT = (temperatures.reduce((a, b) => a + b, 0) / temperatures.length).toFixed(2);
+      html += '基礎体温の平均は ' + avgT + '℃ でした。';
+    }
+    if (fastingHours.length > 0) {
+      const avgF = (fastingHours.reduce((a, b) => a + b, 0) / fastingHours.length).toFixed(1);
+      html += '断食は平均 ' + avgF + ' 時間を維持しました。';
+    }
+    html += '</div>';
+
+    html += '</div>'; // mr-preview 閉じ
+
+    body.innerHTML = html;
+
+  } catch (err) {
+    console.error('Monthly report error:', err);
+    body.innerHTML = '<div class="ds-empty">データの読み込みに失敗しました。</div>';
+  }
+}
+
+// PDF ダウンロード
+async function downloadReportPDF() {
+  const btn = document.querySelector('.mr-btn.primary');
+  const original = btn.textContent;
+  btn.textContent = 'PDF 生成中...';
+  btn.style.pointerEvents = 'none';
+
+  try {
+    // jsPDF を動的に読み込み
+    if (!window.jspdf) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    // フォント設定（日本語対応のためシンプルなテキストベース）
+    doc.setFontSize(18);
+    doc.setTextColor(44, 36, 32);
+    doc.text('ippo Monthly Report', 20, 25);
+
+    doc.setFontSize(10);
+    doc.setTextColor(154, 136, 128);
+    const monthLabel = reportYear + '/' + String(reportMonth + 1).padStart(2, '0');
+    doc.text(monthLabel, 20, 33);
+
+    // 区切り線
+    doc.setDrawColor(200, 180, 170);
+    doc.line(20, 37, 190, 37);
+
+    // レポート内容をテキストとして取得
+    const preview = document.querySelector('.mr-preview');
+    if (!preview) throw new Error('No report data');
+
+    let y = 45;
+    const lineHeight = 6;
+
+    // 統計ボックスからデータ取得
+    const statBoxes = preview.querySelectorAll('.mr-stat-box');
+    if (statBoxes.length > 0) {
+      doc.setFontSize(12);
+      doc.setTextColor(44, 36, 32);
+      doc.text('Summary', 20, y);
+      y += 8;
+
+      doc.setFontSize(10);
+      statBoxes.forEach(box => {
+        const num = box.querySelector('.mr-stat-num')?.textContent || '';
+        const label = box.querySelector('.mr-stat-label')?.textContent || '';
+        doc.setTextColor(44, 36, 32);
+        doc.text(num, 25, y);
+        doc.setTextColor(154, 136, 128);
+        doc.text(' — ' + label, 25 + doc.getTextWidth(num) + 2, y);
+        y += lineHeight;
+      });
+      y += 4;
+    }
+
+    // 棒グラフデータ
+    const chartSections = preview.querySelectorAll('.mr-chart-section');
+    chartSections.forEach(section => {
+      const title = section.querySelector('.mr-chart-title')?.textContent || '';
+      doc.setFontSize(12);
+      doc.setTextColor(44, 36, 32);
+      doc.text(title, 20, y);
+      y += 8;
+
+      const rows = section.querySelectorAll('.mr-bar-row');
+      doc.setFontSize(9);
+      rows.forEach(row => {
+        const label = row.querySelector('.mr-bar-label')?.textContent || '';
+        const count = row.querySelector('.mr-bar-count')?.textContent || '';
+        doc.setTextColor(90, 74, 68);
+        doc.text(label + ': ' + count, 25, y);
+        y += 5;
+      });
+      y += 4;
+
+      // ページ溢れ防止
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+
+    // サマリーテキスト
+    const summaryEl = preview.querySelector('.mr-summary-text');
+    if (summaryEl) {
+      y += 2;
+      doc.setFontSize(10);
+      doc.setTextColor(90, 74, 68);
+      const summaryLines = doc.splitTextToSize(summaryEl.textContent, 165);
+      doc.text(summaryLines, 20, y);
+      y += summaryLines.length * 5 + 8;
+    }
+
+    // 免責
+    doc.setFontSize(7);
+    doc.setTextColor(180, 170, 165);
+    doc.text('This report is generated by ippo. It is not a medical diagnosis.', 20, 285);
+    doc.text('https://www.ippo-app.com', 20, 289);
+
+    // ダウンロード
+    doc.save('ippo-report-' + monthLabel + '.pdf');
+
+    btn.textContent = 'ダウンロード完了 ✓';
+    btn.style.background = '#8aab96';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '';
+      btn.style.pointerEvents = '';
+    }, 2000);
+
+  } catch (err) {
+    console.error('PDF generation error:', err);
+    btn.textContent = 'PDF生成に失敗しました';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.pointerEvents = '';
+    }, 2000);
+  }
+}
+
   
 </script>
 </body>

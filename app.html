@@ -2367,7 +2367,38 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
 
 </div>
 
-<script>
+<script type="module">
+// ===== SUPABASE INITIALIZATION =====
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://ekaoojdqhkpeudujfsdh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_N1aONYfjCsM-AXxBmptkEw_cj5C-0lb';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    storageKey: 'ippo_sb',
+    storage: {
+      getItem: (key) => {
+        if (key.endsWith('-token')) return localStorage.getItem('ippo_sb_token');
+        if (key.endsWith('-refresh')) return localStorage.getItem('ippo_sb_refresh');
+        return localStorage.getItem(key);
+      },
+      setItem: (key, value) => {
+        if (key.endsWith('-token')) localStorage.setItem('ippo_sb_token', value);
+        else if (key.endsWith('-refresh')) localStorage.setItem('ippo_sb_refresh', value);
+        else localStorage.setItem(key, value);
+      },
+      removeItem: (key) => {
+        if (key.endsWith('-token')) localStorage.removeItem('ippo_sb_token');
+        else if (key.endsWith('-refresh')) localStorage.removeItem('ippo_sb_refresh');
+        else localStorage.removeItem(key);
+      }
+    }
+  }
+});
+
+  
 // ===== SUPABASE CLOUD SYNC (auth + user_data) =====
 var SUPABASE_URL = 'https://ekaoojdqhkpeudujfsdh.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrYW9vamRxaGtwZXVkdWpmc2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MTg3MTUsImV4cCI6MjA5MjA5NDcxNX0.QPoyDxCrnhNInpfGJ5qOVQqn6OQ7clAoOmGgvqQTGX0';

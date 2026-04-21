@@ -2374,7 +2374,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const SUPABASE_URL = 'https://ekaoojdqhkpeudujfsdh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_N1aONYfjCsM-AXxBmptkEw_cj5C-0lb';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     persistSession: true,
     storageKey: 'ippo_sb',
@@ -2397,7 +2397,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     }
   }
 });
+</script>
 
+<script>
   
 // ===== SUPABASE CLOUD SYNC (auth + user_data) =====
 var SUPABASE_URL = 'https://ekaoojdqhkpeudujfsdh.supabase.co';

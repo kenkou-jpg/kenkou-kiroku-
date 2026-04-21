@@ -3740,7 +3740,7 @@ function openEditRecord(dateString){
     freeText = parts.join('\n');
   }
   html += '<textarea id="edit-meal-free" placeholder="0930 朝食&#10;1200 昼食&#10;1900 夕食" style="width:100%;min-height:120px;border:1.5px solid #e8ddd8;border-radius:12px;padding:12px;font-family:Noto Sans JP,sans-serif;font-size:13px;color:var(--ink);background:var(--white);resize:vertical;outline:none;line-height:1.9;">'+freeText.replace(/</g,'&lt;')+'</textarea>';
-
+  html += '</div>';
 
   // 基礎体温
   html += '<div style="margin-bottom:16px;">';

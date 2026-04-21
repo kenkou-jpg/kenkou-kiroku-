@@ -1060,11 +1060,11 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
     </div>
     <div class="pf-arrow">→</div>
   </div>
-  <div class="pf-card" style="opacity:0.5;pointer-events:none;">
+<div class="pf-card" onclick="openAIAnalysis()">
     <div class="pf-icon">✨</div>
     <div class="pf-text">
       <div class="pf-title">AIパターン解析</div>
-      <div class="pf-sub">近日公開</div>
+      <div class="pf-sub">90日分の記録からパターンを発見</div>
     </div>
     <div class="pf-arrow">→</div>
   </div>
@@ -1134,7 +1134,26 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
   </div>
 </div>
 
-
+<!-- AI Analysis Modal -->
+<div class="ai-overlay" id="aiAnalysisOverlay">
+  <div class="ai-sheet">
+    <div class="ai-handle"></div>
+    <div class="ai-header">
+      <div class="ai-title">AIパターン解析</div>
+      <div class="ai-subtitle">あなたの記録データからパターンを読み解きます</div>
+    </div>
+    <div class="ai-body" id="aiAnalysisBody">
+      <div class="ai-loading">
+        <div class="ai-loading-icon">✨</div>
+        <div class="ai-loading-text">読み込み中...</div>
+      </div>
+    </div>
+    <div class="ai-footer">
+      <button class="ai-btn secondary" onclick="closeAIAnalysis()">閉じる</button>
+      <button class="ai-btn primary" onclick="copyAIAnalysis()">テキストをコピー</button>
+    </div>
+  </div>
+</div>
 
 /* ===== FEEDBACK ===== */
 .feedback-section {
@@ -5426,6 +5445,436 @@ async function downloadReportPDF() {
       btn.style.pointerEvents = '';
     }, 2000);
   }
+}
+
+  // ===== AI PATTERN ANALYSIS (AIパターン解析) =====
+
+const OPENAI_API_KEY = 'YOUR_API_KEY_HERE'; // ← 後で設定
+
+function openAIAnalysis() {
+  document.getElementById('aiAnalysisOverlay').classList.add('active');
+  runAIAnalysis();
+}
+
+function closeAIAnalysis() {
+  document.getElementById('aiAnalysisOverlay').classList.remove('active');
+}
+
+document.getElementById('aiAnalysisOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAIAnalysis();
+});
+
+async function runAIAnalysis() {
+  const body = document.getElementById('aiAnalysisBody');
+  body.innerHTML = '<div class="ai-loading"><div class="ai-loading-icon">✨</div><div class="ai-loading-text">データを収集しています...</div></div>';
+
+  try {
+    // 過去90日のデータを取得
+    const today = new Date();
+    const ninetyDaysAgo = new Date(today);
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const fromDate = ninetyDaysAgo.toISOString().split('T')[0];
+    const toDate = today.toISOString().split('T')[0];
+
+    const { data: records, error } = await supabase
+      .from('records')
+      .select('*')
+      .gte('record_date', fromDate)
+      .lte('record_date', toDate)
+      .order('record_date', { ascending: true });
+
+    if (error) throw error;
+
+    if (!records || records.length < 3) {
+      body.innerHTML = '<div class="ai-error">パターン解析には最低3日分の記録が必要です。<br>記録を続けてから、もう一度お試しください。</div>';
+      return;
+    }
+
+    body.querySelector('.ai-loading-text').textContent = 'パターンを解析中...';
+
+    // データを集計して要約を作成
+    const summary = buildDataSummary(records);
+
+    // データサマリーを先に表示
+    let dataHtml = '<div class="ai-data-summary">';
+    dataHtml += '<div class="ai-data-title">解析対象データ</div>';
+    dataHtml += '<div class="ai-data-row"><span class="ai-data-label">期間</span><span class="ai-data-value">' + fromDate + ' 〜 ' + toDate + '</span></div>';
+    dataHtml += '<div class="ai-data-row"><span class="ai-data-label">記録日数</span><span class="ai-data-value">' + records.length + ' 日</span></div>';
+    if (summary.avgTemp) dataHtml += '<div class="ai-data-row"><span class="ai-data-label">平均体温</span><span class="ai-data-value">' + summary.avgTemp + ' ℃</span></div>';
+    if (summary.avgFasting) dataHtml += '<div class="ai-data-row"><span class="ai-data-label">平均断食</span><span class="ai-data-value">' + summary.avgFasting + ' 時間</span></div>';
+    if (summary.topChakra) dataHtml += '<div class="ai-data-row"><span class="ai-data-label">最多チャクラ</span><span class="ai-data-value">' + summary.topChakra + '</span></div>';
+    if (summary.topEmotion) dataHtml += '<div class="ai-data-row"><span class="ai-data-label">最多感情</span><span class="ai-data-value">' + summary.topEmotion + '</span></div>';
+    dataHtml += '</div>';
+
+    // AI APIを呼び出し
+    body.innerHTML = dataHtml + '<div class="ai-loading"><div class="ai-loading-icon">✨</div><div class="ai-loading-text">AIがパターンを読み解いています...</div></div>';
+
+    const aiComment = await callAIAPI(summary);
+
+    // 結果を表示
+    let resultHtml = dataHtml;
+    resultHtml += '<div class="ai-result">';
+    resultHtml += '<div class="ai-result-header">';
+    resultHtml += '<div class="ai-result-icon">✨</div>';
+    resultHtml += '<div class="ai-result-label">AIパターン解析</div>';
+    resultHtml += '<div class="ai-result-date">' + new Date().toLocaleDateString('ja-JP') + '</div>';
+    resultHtml += '</div>';
+    resultHtml += '<div class="ai-result-text">' + aiComment + '</div>';
+    resultHtml += '</div>';
+
+    body.innerHTML = resultHtml;
+
+  } catch (err) {
+    console.error('AI analysis error:', err);
+    body.innerHTML = '<div class="ai-error">解析中にエラーが発生しました。<br><br>' + (err.message || '') + '<br><br><button class="ai-retry-btn" onclick="runAIAnalysis()">もう一度試す</button></div>';
+  }
+}
+
+function buildDataSummary(records) {
+  const chakraCounts = {};
+  const emotionCounts = {};
+  const symptomCounts = {};
+  const temperatures = [];
+  const fastingHours = [];
+  const scores = [];
+  const notes = [];
+  const cycleData = [];
+  const dailySummaries = [];
+
+  records.forEach(r => {
+    const d = r.data || {};
+    const daySummary = { date: r.record_date };
+
+    if (d.chakra) {
+      chakraCounts[d.chakra] = (chakraCounts[d.chakra] || 0) + 1;
+      daySummary.chakra = d.chakra;
+    }
+    if (d.emotion) {
+      emotionCounts[d.emotion] = (emotionCounts[d.emotion] || 0) + 1;
+      daySummary.emotion = d.emotion;
+    }
+    if (d.symptoms && d.symptoms.length > 0) {
+      d.symptoms.forEach(s => { symptomCounts[s] = (symptomCounts[s] || 0) + 1; });
+      daySummary.symptoms = d.symptoms;
+    }
+    if (d.temperature) {
+      temperatures.push(parseFloat(d.temperature));
+      daySummary.temp = parseFloat(d.temperature);
+    }
+    if (d.score) {
+      scores.push(Number(d.score));
+      daySummary.score = Number(d.score);
+    }
+    if (d.note && d.note.trim()) {
+      notes.push(d.note);
+      daySummary.note = d.note;
+    }
+    if (d.menstrualCycle && d.menstrualCycle.trim()) {
+      cycleData.push({ date: r.record_date, status: d.menstrualCycle });
+      daySummary.cycle = d.menstrualCycle;
+    }
+    if (d.firstMealTime && d.lastMealTime) {
+      const first = d.firstMealTime.split(':').map(Number);
+      const last = d.lastMealTime.split(':').map(Number);
+      const eating = (last[0] * 60 + last[1]) - (first[0] * 60 + first[1]);
+      if (eating > 0) {
+        const fh = 24 - (eating / 60);
+        fastingHours.push(fh);
+        daySummary.fasting = fh.toFixed(1);
+      }
+    }
+    if (d.meals) daySummary.meals = d.meals;
+
+    dailySummaries.push(daySummary);
+  });
+
+  const topChakra = Object.entries(chakraCounts).sort((a, b) => b[1] - a[1])[0];
+  const topEmotion = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1])[0];
+
+  return {
+    totalDays: records.length,
+    avgTemp: temperatures.length > 0 ? (temperatures.reduce((a, b) => a + b, 0) / temperatures.length).toFixed(2) : null,
+    avgFasting: fastingHours.length > 0 ? (fastingHours.reduce((a, b) => a + b, 0) / fastingHours.length).toFixed(1) : null,
+    topChakra: topChakra ? topChakra[0] + '（' + topChakra[1] + '日）' : null,
+    topEmotion: topEmotion ? topEmotion[0] + '（' + topEmotion[1] + '日）' : null,
+    chakraCounts,
+    emotionCounts,
+    symptomCounts,
+    cycleData,
+    scores,
+    notes: notes.slice(-10),
+    dailySummaries: dailySummaries.slice(-30)
+  };
+}
+
+async function callAIAPI(summary) {
+  // APIキーが設定されていない場合はローカル解析
+  if (!OPENAI_API_KEY || OPENAI_API_KEY === 'YOUR_API_KEY_HERE') {
+    return generateLocalAnalysis(summary);
+  }
+
+  const prompt = `あなたは女性の健康セルフケアアプリ「ippo」のパターン解析アシスタントです。
+以下のユーザーの記録データを分析し、気づいたパターンや傾向をコメントしてください。
+
+【ルール】
+- 医学的な診断や指導は絶対にしない
+- 「〜の傾向があるようです」「〜かもしれません」など、事実の提示に留める
+- 具体的なデータ（日数や回数）を引用する
+- 温かく、押しつけがましくないトーンで
+- 3〜4段落、合計300文字程度
+- HTMLの<p>タグで段落を分ける
+
+【データ】
+記録日数: ${summary.totalDays}日
+${summary.avgTemp ? '平均基礎体温: ' + summary.avgTemp + '℃' : ''}
+${summary.avgFasting ? '平均断食時間: ' + summary.avgFasting + '時間' : ''}
+チャクラ傾向: ${JSON.stringify(summary.chakraCounts)}
+感情傾向: ${JSON.stringify(summary.emotionCounts)}
+症状: ${JSON.stringify(summary.symptomCounts)}
+生理周期: ${JSON.stringify(summary.cycleData)}
+直近メモ: ${summary.notes.join(' / ')}
+体調スコア: ${summary.scores.length > 0 ? '平均' + (summary.scores.reduce((a,b)=>a+b,0)/summary.scores.length).toFixed(1) : 'なし'}`;
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + OPENAI_API_KEY
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 500,
+      temperature: 0.7
+    })
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error('API error: ' + (errData.error?.message || response.status));
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// APIキーなしのローカル解析（フォールバック）
+function generateLocalAnalysis(summary) {
+  let html = '';
+
+  html += '<p>' + summary.totalDays + '日分の記録を分析しました。';
+  if (summary.avgTemp) {
+    html += '基礎体温の平均は ' + summary.avgTemp + '℃ で';
+    const temp = parseFloat(summary.avgTemp);
+    if (temp >= 36.5) html += '、安定した範囲にあるようです。';
+    else html += '、やや低めの傾向があるかもしれません。';
+  }
+  html += '</p>';
+
+  if (summary.avgFasting) {
+    html += '<p>断食は平均 ' + summary.avgFasting + ' 時間を維持しています。';
+    const fh = parseFloat(summary.avgFasting);
+    if (fh >= 16) html += '16時間以上をキープできているのは、継続力の表れです。';
+    else if (fh >= 14) html += '14時間台ですので、無理のないペースで続けられているようです。';
+    else html += 'まだ短めですが、少しずつ伸ばしていくのも一つの方法かもしれません。';
+    html += '</p>';
+  }
+
+  const topSymptoms = Object.entries(summary.symptomCounts).sort((a, b) => b[1] - a[1]);
+  if (topSymptoms.length > 0) {
+    html += '<p>症状としては「' + topSymptoms[0][0] + '」が ' + topSymptoms[0][1] + '日で最も多く記録されています。';
+    if (topSymptoms.length > 1) html += '次いで「' + topSymptoms[1][0] + '」が ' + topSymptoms[1][1] + '日です。';
+    html += '生理周期のどの時期に集中しているか、引き続き記録を重ねると傾向が見えてくるかもしれません。</p>';
+  }
+
+  if (Object.keys(summary.emotionCounts).length > 0) {
+    const topEmo = Object.entries(summary.emotionCounts).sort((a, b) => b[1] - a[1])[0];
+    html += '<p>感情面では「' + topEmo[0] + '」が ' + topEmo[1] + '日で最も多い傾向です。';
+    html += 'からだの状態と感情の波がどうつながっているか、記録が増えるほど見えてくるものがあるかもしれません。</p>';
+  }
+
+  if (html === '') {
+    html = '<p>記録データがまだ少ないため、詳細なパターン解析が難しい状態です。毎日の記録を続けることで、より具体的な傾向が見えてきます。</p>';
+  }
+
+  return html;
+}
+
+function copyAIAnalysis() {
+  const resultEl = document.querySelector('.ai-result-text');
+  if (!resultEl) return;
+
+  let text = '【ippo AIパターン解析】\n';
+  text += '解析日: ' + new Date().toLocaleDateString('ja-JP') + '\n\n';
+  text += resultEl.textContent;
+  text += '\n\n※ このコメントはippoアプリの記録データに基づく参考情報です。医学的診断ではありません。';
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.ai-btn.primary');
+    const original = btn.textContent;
+    btn.textContent = 'コピーしました ✓';
+    btn.style.background = '#8aab96';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '';
+    }, 2000);
+  });
+}
+
+  /* ===== AI ANALYSIS MODAL ===== */
+.ai-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(44,36,32,0.5);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: flex-end;
+}
+.ai-overlay.active { display: flex; }
+.ai-sheet {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 0 0 40px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+.ai-handle {
+  width: 36px; height: 4px;
+  background: rgba(44,36,32,0.15);
+  border-radius: 2px;
+  margin: 12px auto 20px;
+}
+.ai-header {
+  padding: 0 24px 16px;
+  border-bottom: 1px solid rgba(200,180,170,0.2);
+  margin-bottom: 20px;
+}
+.ai-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.ai-subtitle { font-size: 12px; color: var(--ink-light); }
+.ai-body { padding: 0 24px; }
+.ai-loading {
+  text-align: center;
+  padding: 40px 20px;
+}
+.ai-loading-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+.ai-loading-text {
+  font-size: 13px;
+  color: var(--ink-light);
+  line-height: 1.7;
+}
+.ai-result {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 16px;
+}
+.ai-result-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(200,180,170,0.15);
+}
+.ai-result-icon { font-size: 20px; }
+.ai-result-label {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 15px;
+  color: var(--ink);
+}
+.ai-result-date {
+  font-size: 10px;
+  color: var(--ink-light);
+  margin-left: auto;
+}
+.ai-result-text {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 2;
+}
+.ai-result-text p {
+  margin-bottom: 12px;
+}
+.ai-result-text p:last-child { margin-bottom: 0; }
+.ai-data-summary {
+  background: linear-gradient(135deg, var(--rose-pale), var(--warm-light));
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-left: 3px solid var(--rose);
+}
+.ai-data-title {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--rose);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.ai-data-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+}
+.ai-data-label { color: var(--ink-light); }
+.ai-data-value { color: var(--ink); font-weight: 500; }
+.ai-footer {
+  padding: 16px 24px 0;
+  border-top: 1px solid rgba(200,180,170,0.2);
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+}
+.ai-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ai-btn.primary { background: var(--rose); color: white; }
+.ai-btn.primary:hover { background: #FF8A8A; }
+.ai-btn.secondary { background: #f0ebe6; color: var(--ink-mid); }
+.ai-error {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ink-light);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.ai-retry-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: var(--rose);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
 }
 
   

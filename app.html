@@ -1039,6 +1039,76 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
   z-index: 1;
 }
 
+  <!-- Premium Features -->
+<div class="settings-section">
+  <div class="settings-section-title">Premium</div>
+</div>
+<div class="premium-feature-section">
+  <div class="pf-card" onclick="openDoctorSummary()">
+    <div class="pf-icon">🩺</div>
+    <div class="pf-text">
+      <div class="pf-title">婦人科受診サポート</div>
+      <div class="pf-sub">過去30日の体調サマリーを自動生成</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+  <div class="pf-card" style="opacity:0.5;pointer-events:none;">
+    <div class="pf-icon">📊</div>
+    <div class="pf-text">
+      <div class="pf-title">月次レポート（PDF）</div>
+      <div class="pf-sub">近日公開</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+  <div class="pf-card" style="opacity:0.5;pointer-events:none;">
+    <div class="pf-icon">✨</div>
+    <div class="pf-text">
+      <div class="pf-title">AIパターン解析</div>
+      <div class="pf-sub">近日公開</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+  <div class="pf-card" style="opacity:0.5;pointer-events:none;">
+    <div class="pf-icon">🔄</div>
+    <div class="pf-text">
+      <div class="pf-title">デバイス間同期</div>
+      <div class="pf-sub">近日公開</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+  <div class="pf-card" style="opacity:0.5;pointer-events:none;">
+    <div class="pf-icon">💬</div>
+    <div class="pf-text">
+      <div class="pf-title">みんなの声アーカイブ</div>
+      <div class="pf-sub">近日公開</div>
+    </div>
+    <div class="pf-arrow">→</div>
+  </div>
+</div>
+
+<!-- Doctor Summary Modal -->
+<div class="ds-overlay" id="doctorSummaryOverlay">
+  <div class="ds-sheet">
+    <div class="ds-handle"></div>
+    <div class="ds-header">
+      <div class="ds-title">婦人科受診サポート</div>
+      <div class="ds-subtitle">過去30日間の体調サマリー</div>
+    </div>
+    <div class="ds-body" id="doctorSummaryBody">
+      <div class="ds-empty">読み込み中...</div>
+    </div>
+    <div class="ds-disclaimer">
+      ※ このサマリーは医学的診断ではありません。記録データを整理して表示しています。<br>
+      受診の際の参考資料としてご活用ください。
+    </div>
+    <div class="ds-footer">
+      <button class="ds-btn secondary" onclick="closeDoctorSummary()">閉じる</button>
+      <button class="ds-btn primary" onclick="copyDoctorSummary()">テキストをコピー</button>
+    </div>
+  </div>
+</div>
+
+
 /* ===== FEEDBACK ===== */
 .feedback-section {
   margin: 0 24px 20px;
@@ -1210,6 +1280,159 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
 .dm-summary-lbl { font-size: 10px; color: var(--ink-light); margin-top: 4px; }
 .dm-record-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; justify-content: center; }
 .dm-tag { font-size: 11px; padding: 5px 12px; border-radius: 20px; background: var(--rose-pale); color: var(--rose); }
+/* ===== PREMIUM FEATURES ===== */
+.premium-feature-section {
+  margin: 0 24px 20px;
+}
+.pf-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.pf-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px var(--shadow); }
+.pf-icon {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  background: var(--rose-pale);
+}
+.pf-text { flex: 1; }
+.pf-title { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.pf-sub { font-size: 11px; color: var(--ink-light); }
+.pf-arrow { color: var(--ink-light); font-size: 16px; }
+
+/* ===== DOCTOR SUMMARY MODAL ===== */
+.ds-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(44,36,32,0.5);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: flex-end;
+}
+.ds-overlay.active { display: flex; }
+.ds-sheet {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 0 0 40px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+.ds-handle {
+  width: 36px; height: 4px;
+  background: rgba(44,36,32,0.15);
+  border-radius: 2px;
+  margin: 12px auto 20px;
+}
+.ds-header {
+  padding: 0 24px 16px;
+  border-bottom: 1px solid rgba(200,180,170,0.2);
+  margin-bottom: 20px;
+}
+.ds-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.ds-subtitle { font-size: 12px; color: var(--ink-light); }
+.ds-body { padding: 0 24px; }
+.ds-section { margin-bottom: 20px; }
+.ds-section-title {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(200,180,170,0.2);
+}
+.ds-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+  font-size: 13px;
+}
+.ds-row-label { color: var(--ink-light); flex-shrink: 0; width: 40%; }
+.ds-row-value { color: var(--ink); font-weight: 500; text-align: right; flex: 1; }
+.ds-tag-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.ds-tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--rose-pale);
+  color: var(--rose);
+}
+.ds-meal-day { margin-bottom: 12px; }
+.ds-meal-date {
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.ds-meal-items { font-size: 12px; color: var(--ink-mid); line-height: 1.7; }
+.ds-note-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(200,180,170,0.1);
+  font-size: 12px;
+}
+.ds-note-date { color: var(--ink-light); font-size: 11px; }
+.ds-note-text { color: var(--ink); margin-top: 2px; }
+.ds-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ink-light);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.ds-footer {
+  padding: 16px 24px 0;
+  border-top: 1px solid rgba(200,180,170,0.2);
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+}
+.ds-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ds-btn.primary { background: var(--rose); color: white; }
+.ds-btn.primary:hover { background: #FF8A8A; }
+.ds-btn.secondary { background: #f0ebe6; color: var(--ink-mid); }
+.ds-disclaimer {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(200,180,170,0.1);
+  border-radius: 12px;
+  font-size: 10px;
+  color: var(--ink-light);
+  line-height: 1.7;
+  text-align: center;
+}
 
 </style>
 </head>
@@ -4376,6 +4599,295 @@ document.addEventListener('DOMContentLoaded', function() {
   updateChakraProfileDisplay();
 });
 
+// ===== DOCTOR SUMMARY (婦人科受診サポート) =====
+
+function openDoctorSummary() {
+  document.getElementById('doctorSummaryOverlay').classList.add('active');
+  generateDoctorSummary();
+}
+
+function closeDoctorSummary() {
+  document.getElementById('doctorSummaryOverlay').classList.remove('active');
+}
+
+document.getElementById('doctorSummaryOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeDoctorSummary();
+});
+
+async function generateDoctorSummary() {
+  const body = document.getElementById('doctorSummaryBody');
+  body.innerHTML = '<div class="ds-empty">データを読み込み中...</div>';
+
+  try {
+    // 過去30日の日付範囲
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
+    const toDate = today.toISOString().split('T')[0];
+
+    // Supabaseから取得
+    const deviceId = localStorage.getItem('ippo_device_id') || '';
+    const { data: records, error } = await supabase
+      .from('records')
+      .select('*')
+      .gte('record_date', fromDate)
+      .lte('record_date', toDate)
+      .order('record_date', { ascending: true });
+
+    if (error) throw error;
+
+    if (!records || records.length === 0) {
+      body.innerHTML = '<div class="ds-empty">過去30日間の記録がありません。<br>毎日の記録を続けると、ここに体調サマリーが自動生成されます。</div>';
+      return;
+    }
+
+    // データ集計
+    const totalDays = records.length;
+    const chakraCounts = {};
+    const emotionCounts = {};
+    const symptomCounts = {};
+    const mealDays = [];
+    const notes = [];
+    const temperatures = [];
+    const fastingHours = [];
+    const cycleStatuses = [];
+
+    records.forEach(r => {
+      const d = r.data || {};
+
+      // チャクラ集計
+      if (d.chakra) {
+        chakraCounts[d.chakra] = (chakraCounts[d.chakra] || 0) + 1;
+      }
+
+      // 感情集計
+      if (d.emotion) {
+        emotionCounts[d.emotion] = (emotionCounts[d.emotion] || 0) + 1;
+      }
+
+      // 症状集計
+      if (d.symptoms && d.symptoms.length > 0) {
+        d.symptoms.forEach(s => {
+          symptomCounts[s] = (symptomCounts[s] || 0) + 1;
+        });
+      }
+
+      // 食事記録
+      if (d.meals && (d.meals.morning || d.meals.lunch || d.meals.dinner)) {
+        mealDays.push({ date: r.record_date, meals: d.meals });
+      }
+
+      // メモ
+      if (d.note && d.note.trim()) {
+        notes.push({ date: r.record_date, text: d.note });
+      }
+
+      // 基礎体温
+      if (d.temperature) {
+        temperatures.push({ date: r.record_date, value: parseFloat(d.temperature) });
+      }
+
+      // 断食時間計算
+      if (d.firstMealTime && d.lastMealTime) {
+        const first = d.firstMealTime.split(':').map(Number);
+        const last = d.lastMealTime.split(':').map(Number);
+        const eating = (last[0] * 60 + last[1]) - (first[0] * 60 + first[1]);
+        if (eating > 0) {
+          fastingHours.push(24 - (eating / 60));
+        }
+      }
+
+      // 生理周期
+      if (d.menstrualCycle && d.menstrualCycle.trim()) {
+        cycleStatuses.push({ date: r.record_date, status: d.menstrualCycle });
+      }
+
+      // 体調スコア
+      if (d.score) {
+        // スコアも集計可能
+      }
+    });
+
+    // HTML生成
+    let html = '';
+
+    // 基本情報
+    html += '<div class="ds-section">';
+    html += '<div class="ds-section-title">記録概要</div>';
+    html += '<div class="ds-row"><span class="ds-row-label">記録期間</span><span class="ds-row-value">' + fromDate + ' 〜 ' + toDate + '</span></div>';
+    html += '<div class="ds-row"><span class="ds-row-label">記録日数</span><span class="ds-row-value">' + totalDays + ' 日 / 30日</span></div>';
+    html += '</div>';
+
+    // 生理周期
+    if (cycleStatuses.length > 0) {
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">生理周期</div>';
+      cycleStatuses.forEach(c => {
+        html += '<div class="ds-row"><span class="ds-row-label">' + c.date + '</span><span class="ds-row-value">' + c.status + '</span></div>';
+      });
+      html += '</div>';
+    }
+
+    // 基礎体温
+    if (temperatures.length > 0) {
+      const avgTemp = (temperatures.reduce((sum, t) => sum + t.value, 0) / temperatures.length).toFixed(2);
+      const minTemp = Math.min(...temperatures.map(t => t.value)).toFixed(2);
+      const maxTemp = Math.max(...temperatures.map(t => t.value)).toFixed(2);
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">基礎体温</div>';
+      html += '<div class="ds-row"><span class="ds-row-label">平均</span><span class="ds-row-value">' + avgTemp + ' ℃</span></div>';
+      html += '<div class="ds-row"><span class="ds-row-label">最低 / 最高</span><span class="ds-row-value">' + minTemp + ' / ' + maxTemp + ' ℃</span></div>';
+      html += '<div class="ds-row"><span class="ds-row-label">記録日数</span><span class="ds-row-value">' + temperatures.length + ' 日</span></div>';
+      html += '</div>';
+    }
+
+    // 症状
+    if (Object.keys(symptomCounts).length > 0) {
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">記録された症状</div>';
+      const sortedSymptoms = Object.entries(symptomCounts).sort((a, b) => b[1] - a[1]);
+      sortedSymptoms.forEach(([symptom, count]) => {
+        html += '<div class="ds-row"><span class="ds-row-label">' + symptom + '</span><span class="ds-row-value">' + count + ' 日</span></div>';
+      });
+      html += '</div>';
+    }
+
+    // チャクラ
+    if (Object.keys(chakraCounts).length > 0) {
+      const chakraNames = {
+        'root': '第1（ルート）',
+        'sacral': '第2（仙骨）',
+        'solar': '第3（太陽神経叢）',
+        'heart': '第4（ハート）',
+        'throat': '第5（喉）',
+        'third-eye': '第6（第三の目）',
+        'crown': '第7（クラウン）'
+      };
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">チャクラの状態（参考）</div>';
+      const sortedChakras = Object.entries(chakraCounts).sort((a, b) => b[1] - a[1]);
+      sortedChakras.forEach(([chakra, count]) => {
+        const name = chakraNames[chakra] || chakra;
+        html += '<div class="ds-row"><span class="ds-row-label">' + name + '</span><span class="ds-row-value">' + count + ' 日</span></div>';
+      });
+      html += '</div>';
+    }
+
+    // 断食
+    if (fastingHours.length > 0) {
+      const avgFasting = (fastingHours.reduce((sum, h) => sum + h, 0) / fastingHours.length).toFixed(1);
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">断食（インターミッテント・ファスティング）</div>';
+      html += '<div class="ds-row"><span class="ds-row-label">平均断食時間</span><span class="ds-row-value">約 ' + avgFasting + ' 時間</span></div>';
+      html += '<div class="ds-row"><span class="ds-row-label">記録日数</span><span class="ds-row-value">' + fastingHours.length + ' 日</span></div>';
+      html += '</div>';
+    }
+
+    // 感情
+    if (Object.keys(emotionCounts).length > 0) {
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">感情・気分の傾向</div>';
+      const sortedEmotions = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1]);
+      sortedEmotions.forEach(([emotion, count]) => {
+        html += '<div class="ds-row"><span class="ds-row-label">' + emotion + '</span><span class="ds-row-value">' + count + ' 日</span></div>';
+      });
+      html += '</div>';
+    }
+
+    // メモ（最新5件）
+    if (notes.length > 0) {
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">メモ・体調の記録（最新5件）</div>';
+      notes.slice(-5).reverse().forEach(n => {
+        html += '<div class="ds-note-item"><div class="ds-note-date">' + n.date + '</div><div class="ds-note-text">' + n.text + '</div></div>';
+      });
+      html += '</div>';
+    }
+
+    // 食事（最新5日分）
+    if (mealDays.length > 0) {
+      html += '<div class="ds-section">';
+      html += '<div class="ds-section-title">食事記録（最新5日分）</div>';
+      mealDays.slice(-5).reverse().forEach(m => {
+        html += '<div class="ds-meal-day">';
+        html += '<div class="ds-meal-date">' + m.date + '</div>';
+        html += '<div class="ds-meal-items">';
+        if (m.meals.morning) html += '朝: ' + m.meals.morning + '<br>';
+        if (m.meals.lunch) html += '昼: ' + m.meals.lunch + '<br>';
+        if (m.meals.dinner) html += '夜: ' + m.meals.dinner + '<br>';
+        if (m.meals.snack) html += '間食: ' + m.meals.snack;
+        html += '</div></div>';
+      });
+      html += '</div>';
+    }
+
+    body.innerHTML = html;
+
+  } catch (err) {
+    console.error('Doctor summary error:', err);
+    body.innerHTML = '<div class="ds-empty">データの読み込みに失敗しました。<br>もう一度お試しください。</div>';
+  }
+}
+
+// テキストコピー機能
+function copyDoctorSummary() {
+  const body = document.getElementById('doctorSummaryBody');
+  let text = '【ippo 体調サマリー】\n';
+  text += '生成日: ' + new Date().toLocaleDateString('ja-JP') + '\n\n';
+
+  const sections = body.querySelectorAll('.ds-section');
+  sections.forEach(section => {
+    const title = section.querySelector('.ds-section-title');
+    if (title) text += '■ ' + title.textContent + '\n';
+
+    const rows = section.querySelectorAll('.ds-row');
+    rows.forEach(row => {
+      const label = row.querySelector('.ds-row-label');
+      const value = row.querySelector('.ds-row-value');
+      if (label && value) text += '  ' + label.textContent + ': ' + value.textContent + '\n';
+    });
+
+    const notes = section.querySelectorAll('.ds-note-item');
+    notes.forEach(note => {
+      const date = note.querySelector('.ds-note-date');
+      const noteText = note.querySelector('.ds-note-text');
+      if (date && noteText) text += '  ' + date.textContent + ' — ' + noteText.textContent + '\n';
+    });
+
+    const meals = section.querySelectorAll('.ds-meal-day');
+    meals.forEach(meal => {
+      const date = meal.querySelector('.ds-meal-date');
+      const items = meal.querySelector('.ds-meal-items');
+      if (date) text += '  ' + date.textContent + '\n';
+      if (items) text += '  ' + items.textContent.replace(/<br>/g, ' / ') + '\n';
+    });
+
+    text += '\n';
+  });
+
+  text += '※ このサマリーはippoアプリの記録データを整理したものです。医学的診断ではありません。';
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.ds-btn.primary');
+    const original = btn.textContent;
+    btn.textContent = 'コピーしました ✓';
+    btn.style.background = '#8aab96';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '';
+    }, 2000);
+  }).catch(() => {
+    // フォールバック
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+  
 </script>
 </body>
 </html>

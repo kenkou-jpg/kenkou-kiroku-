@@ -6519,11 +6519,16 @@ if(premiumOverlay) premiumOverlay.addEventListener('click', function(e) {
 if (e.target === this) closePremiumLock();
 });
 
- // Supabase認証の準備完了を待ってからプレミアム状態を確認
-supabase.auth.onAuthStateChange(function(event, session){
-  checkPremiumStatus();
-});
-setTimeout(function(){ checkPremiumStatus(); }, 3000);
+// Supabase認証の準備完了を待ってからプレミアム状態を確認
+var premiumCheckInterval = setInterval(function(){
+  if(typeof supabase !== 'undefined' && supabase.auth){
+    clearInterval(premiumCheckInterval);
+    supabase.auth.onAuthStateChange(function(event, session){
+      checkPremiumStatus();
+    });
+    checkPremiumStatus();
+  }
+}, 500);
 
 
   </script>

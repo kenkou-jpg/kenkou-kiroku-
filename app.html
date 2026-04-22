@@ -6514,7 +6514,8 @@ function closePremiumLock() {
   document.getElementById('premiumLockOverlay').classList.remove('active');
 }
 
-document.getElementById('premiumLockOverlay').addEventListener('click', function(e) {
+var premiumOverlay = document.getElementById('premiumLockOverlay'); 
+  if(premiumOverlay) premiumOverlay.addEventListener('click', function(e) {
   if (e.target === this) closePremiumLock();
 });
 

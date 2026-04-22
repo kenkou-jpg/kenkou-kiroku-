@@ -3977,7 +3977,7 @@ function openEditRecord(dateString){
   // 生理状態
   html += '<div style="margin-bottom:16px;">';
   html += '<div style="font-size:10px;color:var(--ink-light);letter-spacing:0.15em;margin-bottom:10px;">MENSTRUAL CYCLE</div>';
-  var cycleOptions = ['なし','生理中','排卵期','高温期','低温期'];
+  var cycleOptions = ['なし','生理開始','生理中','排卵期','高温期','低温期'];
   var currentCycle = (rec && rec.menstrualCycle) ? rec.menstrualCycle : '';
   html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
   for(var ci=0;ci<cycleOptions.length;ci++){

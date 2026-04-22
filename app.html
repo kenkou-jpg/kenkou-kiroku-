@@ -6518,8 +6518,8 @@ document.getElementById('premiumLockOverlay').addEventListener('click', function
   if (e.target === this) closePremiumLock();
 });
 
-// ページ読み込み時にプレミアム状態を確認
-checkPremiumStatus();
+  // ページ読み込み時にプレミアム状態を確認（認証準備を待つ）
+setTimeout(function(){ checkPremiumStatus(); }, 1500);
 
 
   </script>

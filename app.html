@@ -2952,6 +2952,20 @@ function endFast() {
   state.fastingActive = false;
   state.fastingStart = null;
   clearInterval(fastInterval);
+
+  // タイマー結果を今日の記録に保存
+  var todayStr = new Date().toDateString();
+  var rec = null;
+  for(var i=0; i<state.records.length; i++){
+    if(new Date(state.records[i].date).toDateString() === todayStr){ rec = state.records[i]; break; }
+  }
+  if(!rec){
+    rec = { date: new Date().toISOString() };
+    state.records.push(rec);
+  }
+  rec.fastingTimer = Math.round(elapsed * 10) / 10;
+  rec.fastingGoal = state.fastGoal || 16;
+
   saveState();
   document.getElementById('fast-start-btn').style.display = 'block';
   document.getElementById('fast-stop-btn').style.display = 'none';

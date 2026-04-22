@@ -6518,8 +6518,11 @@ document.getElementById('premiumLockOverlay').addEventListener('click', function
   if (e.target === this) closePremiumLock();
 });
 
-  // ページ読み込み時にプレミアム状態を確認（認証準備を待つ）
-setTimeout(function(){ checkPremiumStatus(); }, 1500);
+ // Supabase認証の準備完了を待ってからプレミアム状態を確認
+supabase.auth.onAuthStateChange(function(event, session){
+  checkPremiumStatus();
+});
+setTimeout(function(){ checkPremiumStatus(); }, 3000);
 
 
   </script>

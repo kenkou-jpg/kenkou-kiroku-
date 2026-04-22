@@ -6514,9 +6514,9 @@ function closePremiumLock() {
   document.getElementById('premiumLockOverlay').classList.remove('active');
 }
 
-var premiumOverlay = document.getElementById('premiumLockOverlay'); 
-  if(premiumOverlay) premiumOverlay.addEventListener('click', function(e) {
-  if (e.target === this) closePremiumLock();
+var premiumOverlay = document.getElementById('premiumLockOverlay');
+if(premiumOverlay) premiumOverlay.addEventListener('click', function(e) {
+if (e.target === this) closePremiumLock();
 });
 
  // Supabase認証の準備完了を待ってからプレミアム状態を確認

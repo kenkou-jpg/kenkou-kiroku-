@@ -3344,40 +3344,10 @@ function selectWellness(v, el) {
   el.classList.add('selected');
 }
 
-function renderChakra() {
-  const chakras = [
-    { n: '第1チャクラ', d: '骨盤底・安心感', color: '#e74c3c' },
-    { n: '第2チャクラ ★', d: '子宮・卵巣・創造性', color: '#e67e22', featured: true },
-    { n: '第3チャクラ', d: '腹部・自己肯定', color: '#f1c40f' },
-    { n: '第4チャクラ', d: '胸・愛と受容', color: '#2ecc71' },
-    { n: '第5チャクラ', d: '喉・表現・声', color: '#3498db' },
-    { n: '第6チャクラ', d: '眉間・直感・洞察', color: '#9b59b6' },
-  ];
-  document.getElementById('modal-body').innerHTML = `
-    <div class="chakra-simple">
-      ${chakras.map((c, i) => `
-        <div class="chakra-item ${c.featured ? 'featured' : ''} ${currentRecord.chakra === i ? 'selected' : ''}"
-             data-chakra-index="${i}" onclick="selectChakra(${i})">
-          <div class="chakra-dot" style="background:${c.color}"></div>
-          <div class="chakra-name">${c.n}</div>
-          <div class="chakra-desc">${c.d}</div>
-          ${c.featured ? '<span class="chakra-star">★</span>' : ''}
-        </div>
-      `).join('')}
-    </div>
-    <button class="btn-skip" onclick="skipChakra()" style="display:block;text-align:center;width:100%;padding:8px;color:var(--ink-light);font-size:12px;background:none;border:none;cursor:pointer;">スキップ →</button>
-  `;
-}
+function renderChakra() {}
+function selectChakra(i) {}
+function skipChakra() { nextStep(); }
 
-function selectChakra(i) {
-  // バグ10: elではなくdata属性でターゲット要素を特定し、子要素クリック時のズレを防ぐ
-  currentRecord.chakra = i;
-  document.querySelectorAll('.chakra-item').forEach(b => b.classList.remove('selected'));
-  const target = document.querySelector(`.chakra-item[data-chakra-index="${i}"]`);
-  if (target) target.classList.add('selected');
-}
-
-function skipChakra() { currentRecord.chakra = null; nextStep(); }
 
 function renderFood() {
   const foods = ['根菜類', '発酵食品', '温かいもの', '砂糖控え', 'グルテンフリー', 'EPA/DHA', 'ビタミンD', '鉄分', '水2L以上'];

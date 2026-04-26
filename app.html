@@ -1875,34 +1875,7 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
     </div>
 
       <!-- Sample Graph with demo overlay -->
-      <div class="sample-graph-section">
-        <div class="sg-header">
-          <div class="sg-title">からだのリズム</div>
-          <div class="sg-tabs">
-            <button class="sg-tab active" onclick="setGraphTab('7d', this)">7日</button>
-            <button class="sg-tab" onclick="setGraphTab('30d', this)">30日</button>
-            <button class="sg-tab" onclick="setGraphTab('90d', this)">90日</button>
-          </div>
-        </div>
-        <div class="demo-graph">
-          <svg class="demo-chart-svg" viewBox="0 0 300 100">
-            <defs>
-              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#c9747a" stop-opacity="0.3"/>
-                <stop offset="100%" stop-color="#c9747a" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <path d="M0,70 C30,65 50,40 80,45 C110,50 130,30 160,35 C190,40 210,25 240,28 C270,31 290,20 300,18" stroke="#c9747a" stroke-width="2" fill="none" opacity="0.35"/>
-            <path d="M0,70 C30,65 50,40 80,45 C110,50 130,30 160,35 C190,40 210,25 240,28 C270,31 290,20 300,18 L300,100 L0,100 Z" fill="url(#chartGrad)" opacity="0.3"/>
-          </svg>
-          <div class="demo-overlay" id="graph-overlay">
-            <div class="demo-overlay-inner">
-              <div class="demo-overlay-title">🔒 記録を続けるとグラフが表示されます</div>
-              <div class="demo-overlay-sub">7日間記録でパターン分析が解放</div>
-            </div>
-          </div>
-        </div>
-      </div>
+    
 
 
             <!-- Community Voice -->
@@ -1935,17 +1908,6 @@ h1, h2, h3, .serif { font-family: 'Shippori Mincho', serif; }
   </div>
 </div>
 
-
-
-      <!-- Pattern Message -->
-      <div class="pattern-section">
-        <div class="ps-label">YOUR PATTERN</div>
-        <div class="ps-text">記録を積み重ねるたびに、<br>あなたのからだが少しずつ見えてくる。</div>
-        <div class="ps-locked" id="pattern-locked">
-          <span>🔒</span>
-          <span>7日以上記録するとパターンメッセージが届きます</span>
-        </div>
-      </div>
 
     </div> <!-- screen-insights 終了 -->
 
